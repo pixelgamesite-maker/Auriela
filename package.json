@@ -4,10 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "start": "npx serve -s dist -l $PORT"
-  },
+  "dev": "vite",
+  "build": "vite build",
+  "serve": "npx serve -s dist -l $PORT",
+  "start": "npx serve -s dist -l $PORT"
+  }
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "^1.2.4",
