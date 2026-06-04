@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import "tw-animate-css";
 
 @layer base {
   :root {
@@ -27,14 +26,14 @@
   }
 
   * {
-    @apply border-border;
     box-sizing: border-box;
     margin: 0;
     padding: 0;
   }
 
   body {
-    @apply bg-background text-foreground;
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
     font-family: system-ui, -apple-system, sans-serif;
   }
 }
