@@ -11,7 +11,7 @@ import {
   type StarClaim,
 } from "@/lib/supabase";
 import { Link } from "wouter";
-import { ASSETS } from "@/assets";
+import { ASSETS } from "@/lib/assets";
 
 // ── Task definitions ───────────────────────────────────────────────────────────
 const SOCIAL_TASKS = [
@@ -436,4 +436,4 @@ function TaskColumn({
     </div>
   );
 }
-          
+        
