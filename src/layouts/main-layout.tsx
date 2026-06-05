@@ -139,7 +139,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
                 color: isActive(href) ? "#111" : "#888",
                 fontWeight: isActive(href) ? 700 : 400,
                 fontFamily: "system-ui, sans-serif",
-                fontSize: 13, letterSpacing: 1px,
+                fontSize: 13, letterSpacing: "1px",
               }}>
                 {label}
               </a>
