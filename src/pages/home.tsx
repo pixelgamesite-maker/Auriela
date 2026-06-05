@@ -10,20 +10,19 @@ import {
   CLAIM_INTERVAL_MS,
   type StarClaim,
 } from "@/lib/supabase";
-import { Link } from "wouter";
 import { ASSETS } from "@/lib/assets";
 
 // ── Task definitions ───────────────────────────────────────────────────────────
 const SOCIAL_TASKS = [
-  { id: "follow_x",       icon: "𝕏",  label: "Follow on X",          stars: 10, href: ASSETS.links.x        },
-  { id: "join_discord",   icon: "◆",  label: "Join Discord",           stars: 15, href: ASSETS.links.discord  },
-  { id: "join_telegram",  icon: "✈",  label: "Join Telegram Channel",  stars: 10, href: ASSETS.links.telegram },
+  { id: "follow_x",      icon: "𝕏", label: "Follow on X",         stars: 10, href: ASSETS.links.x        },
+  { id: "join_discord",  icon: "◆", label: "Join Discord",          stars: 15, href: ASSETS.links.discord  },
+  { id: "join_telegram", icon: "✈", label: "Join Telegram Channel", stars: 10, href: ASSETS.links.telegram },
 ];
 
 const INTERACTIVE_TASKS = [
-  { id: "visit_website",   icon: "⊕", label: "Visit Website",   stars: 10, href: ASSETS.links.website },
-  { id: "read_lore",       icon: "⊞", label: "Read the Lore",   stars: 15, href: "/lore", internal: true },
-  { id: "connect_wallet",  icon: "⊟", label: "Connect Wallet",  stars: 20, href: null },
+  { id: "visit_website",  icon: "⊕", label: "Visit Website",  stars: 10, href: ASSETS.links.website          },
+  { id: "read_lore",      icon: "⊞", label: "Read the Lore",  stars: 15, href: "/lore", internal: true       },
+  { id: "connect_wallet", icon: "⊟", label: "Connect Wallet", stars: 20, href: null                          },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -48,10 +47,11 @@ function Avatar({ src, handle, size = 36 }: { src?: string | null; handle: strin
   const color = palette[(handle.charCodeAt(1) || 0) % palette.length];
   if (src) {
     return (
-      <img
-        src={src} alt={handle}
-        style={{ width: size, height: size, borderRadius: "50%", border: `1px solid ${ASSETS.colors.goldBorder}`, objectFit: "cover", flexShrink: 0 }}
-      />
+      <img src={src} alt={handle} style={{
+        width: size, height: size, borderRadius: "50%",
+        border: `1px solid ${ASSETS.colors.goldBorder}`,
+        objectFit: "cover", flexShrink: 0,
+      }} />
     );
   }
   return (
@@ -60,17 +60,18 @@ function Avatar({ src, handle, size = 36 }: { src?: string | null; handle: strin
       background: color, border: `1px solid ${ASSETS.colors.goldBorder}`,
       display: "flex", alignItems: "center", justifyContent: "center",
       fontSize: size * 0.38, fontWeight: 700, color: ASSETS.colors.gold, flexShrink: 0,
+      fontFamily: "system-ui",
     }}>
       {handle?.[1]?.toUpperCase() || "?"}
     </div>
   );
 }
 
-// ── Star icon ──────────────────────────────────────────────────────────────────
-function StarIcon({ size = 14, gold = false }) {
+// ── Sparkle icon ───────────────────────────────────────────────────────────────
+function Sparkle({ size = 14, gold = false }: { size?: number; gold?: boolean }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill={gold ? ASSETS.colors.gold : "currentColor"}>
-      <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
+      <path d="M12 2 L13.5 10.5 L22 12 L13.5 13.5 L12 22 L10.5 13.5 L2 12 L10.5 10.5 Z" />
     </svg>
   );
 }
@@ -86,7 +87,6 @@ export default function Home() {
   const [feed,        setFeed]        = useState<StarClaim[]>([]);
   const [taskLoading, setTaskLoading] = useState<string | null>(null);
 
-  // Countdown timer
   useEffect(() => {
     const tick = () => {
       if (!user?.last_claim) { setCanClaim(true); setCountdown(0); return; }
@@ -100,7 +100,6 @@ export default function Home() {
     return () => clearInterval(id);
   }, [user?.last_claim]);
 
-  // Live feed
   useEffect(() => {
     getRecentClaims().then(setFeed);
     const channel = subscribeToLiveFeed((claim) => {
@@ -136,103 +135,132 @@ export default function Home() {
   return (
     <MainLayout>
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:wght@300;400;600&display=swap');
         @keyframes fadeSlide { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
-        @keyframes pulse     { 0%,100%{opacity:1} 50%{opacity:.4} }
-        .task-row:hover  { background: ${ASSETS.colors.goldLight} !important; }
-        .claim-btn:hover:not(:disabled) { background: #333 !important; }
-        .claim-btn:active:not(:disabled){ transform: scale(0.97); }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+        .task-row:hover { background: rgba(201,168,76,0.05) !important; }
+        .claim-btn:hover:not(:disabled) { background: #2a2a2a !important; }
+        .claim-btn:active:not(:disabled) { transform: scale(0.97); }
+        .waitlist-btn:hover { background: rgba(0,0,0,0.04) !important; }
       `}</style>
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
       <section style={{
         position: "relative",
         minHeight: "calc(100vh - 68px)",
-        display: "flex", alignItems: "center",
+        display: "flex",
+        alignItems: "flex-start",
         overflow: "hidden",
         background: ASSETS.colors.bg,
       }}>
-        {/* Character image — right side */}
-        <div style={{
-          position: "absolute", right: 0, top: 0, bottom: 0,
-          width: "clamp(260px, 48%, 680px)",
-          backgroundImage: `url('${ASSETS.images.character}')`,
-          backgroundSize: "contain",
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "right bottom",
-        }} />
+        {/* Character — absolutely right, clips nicely on mobile */}
+        <img
+          src={ASSETS.images.character}
+          alt="Aurelia"
+          style={{
+            position: "absolute",
+            right: 0,
+            top: 0,
+            height: "100%",
+            width: "55%",
+            objectFit: "contain",
+            objectPosition: "right bottom",
+            pointerEvents: "none",
+            userSelect: "none",
+          }}
+          onError={(e) => { (e.currentTarget.style.display = "none"); }}
+        />
 
-        {/* Decorative sparkles */}
-        {[[8,12],[22,58],[18,82],[72,8],[80,68],[88,32],[55,92],[42,4]].map(([t,l], i) => (
+        {/* Sparkle decorations */}
+        {([[8,12],[22,58],[18,82],[72,8],[80,68],[88,32],[55,92],[42,4]] as [number,number][]).map(([t,l], i) => (
           <span key={i} style={{
             position: "absolute", top: `${t}%`, left: `${l}%`,
-            color: ASSETS.colors.gold, opacity: 0.45,
-            fontSize: i % 2 === 0 ? 10 : 18,
+            color: ASSETS.colors.gold, opacity: 0.4,
+            fontSize: i % 2 === 0 ? 10 : 16,
             pointerEvents: "none",
           }}>✦</span>
         ))}
 
+        {/* Content column */}
         <div style={{
           position: "relative", zIndex: 2,
-          maxWidth: 620,
-          marginLeft: "clamp(24px, 8vw, 100px)",
-          padding: "40px 24px",
+          width: "100%",
+          maxWidth: 520,
+          padding: "clamp(28px, 6vw, 56px) clamp(20px, 6vw, 56px) 48px",
         }}>
-          {/* Logo image above headline */}
+          {/* Logo image */}
           <img
             src={ASSETS.images.logo}
             alt={ASSETS.brand.name}
-            style={{ height: 72, marginBottom: 12, display: "block" }}
-            onError={(e) => { (e.currentTarget.style.display = "none"); }}
+            style={{ height: 80, marginBottom: 16, display: "block", maxWidth: "70vw" }}
+            onError={(e) => {
+              (e.currentTarget.style.display = "none");
+              const fallback = document.getElementById("hero-brand-text");
+              if (fallback) fallback.style.display = "block";
+            }}
           />
+          <span id="hero-brand-text" style={{
+            display: "none",
+            fontFamily: "'Playfair Display', serif",
+            fontSize: 36, letterSpacing: 6, fontWeight: 700, color: "#111",
+            marginBottom: 16,
+          }}>
+            {ASSETS.brand.name}
+          </span>
 
           <h1 style={{
             fontFamily: "'Playfair Display', serif",
-            fontSize: "clamp(52px, 7vw, 90px)",
-            fontWeight: 700, lineHeight: 1.02,
-            color: ASSETS.colors.ink, margin: "0 0 14px",
+            fontSize: "clamp(44px, 8vw, 80px)",
+            fontWeight: 700, lineHeight: 1.05,
+            color: ASSETS.colors.ink,
+            margin: "0 0 12px",
           }}>
-            {ASSETS.brand.tagline.split(" ").slice(0, 2).join(" ")}<br />
-            {ASSETS.brand.tagline.split(" ").slice(2).join(" ")}
+            Secure<br />Your Spot
           </h1>
 
           <p style={{
             fontFamily: "system-ui, sans-serif",
-            fontSize: 15, color: ASSETS.colors.muted,
-            marginBottom: 36, letterSpacing: 0.2,
+            fontSize: 14, color: ASSETS.colors.muted,
+            marginBottom: 28, letterSpacing: 0.2, lineHeight: 1.5,
           }}>
             {ASSETS.brand.description}
           </p>
 
           {/* CTA buttons */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 280, marginBottom: 16 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 300, marginBottom: 14 }}>
             <button
               className="claim-btn"
               onClick={handleClaim}
               disabled={!!user && !canClaim}
               style={{
                 background: ASSETS.colors.ink, color: "#fff",
-                border: "none", borderRadius: 7,
-                padding: "15px 30px", fontSize: 15, cursor: "pointer",
-                fontFamily: "system-ui", letterSpacing: 0.3,
+                border: "none", borderRadius: 8,
+                padding: "15px 28px", fontSize: 15,
+                cursor: (!!user && !canClaim) ? "not-allowed" : "pointer",
+                fontFamily: "system-ui", letterSpacing: 0.4,
                 transition: "background 0.2s, transform 0.1s",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                opacity: (!!user && !canClaim) ? 0.55 : 1,
+                opacity: (!!user && !canClaim) ? 0.5 : 1,
               }}
             >
-              {claiming ? "Claiming…" : "✦ Claim Stars"}
+              <Sparkle size={13} />
+              {claiming ? "Claiming…" : "Claim Stars"}
             </button>
 
             <button
+              className="waitlist-btn"
               onClick={() => signInWithX()}
               style={{
                 background: "transparent", color: ASSETS.colors.ink,
-                border: `1.5px solid ${ASSETS.colors.ink}`, borderRadius: 7,
-                padding: "14px 30px", fontSize: 15, cursor: "pointer",
-                fontFamily: "system-ui", letterSpacing: 0.3, transition: "all 0.2s",
+                border: `1.5px solid ${ASSETS.colors.ink}`, borderRadius: 8,
+                padding: "14px 28px", fontSize: 15, cursor: "pointer",
+                fontFamily: "system-ui", letterSpacing: 0.4,
+                transition: "background 0.2s",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
               }}
             >
-              ✦ Join Waitlist
+              <Sparkle size={13} />
+              Join Waitlist
             </button>
           </div>
 
@@ -247,70 +275,88 @@ export default function Home() {
           )}
 
           <p style={{
-            fontSize: 12, color: ASSETS.colors.faint,
-            letterSpacing: 0.3, marginBottom: 40, fontFamily: "system-ui",
+            fontSize: 12, color: "#bbb",
+            letterSpacing: 0.3, marginBottom: 32,
+            fontFamily: "system-ui",
           }}>
             ✦ {ASSETS.brand.priorityNote} ✦
           </p>
 
-          {/* ── TASKS PANEL ─────────────────────────────────────────────── */}
+          {/* ── STARS CARD ────────────────────────────────────────────── */}
           <div style={{
             background: ASSETS.colors.surface,
-            borderRadius: 18,
             border: `1px solid ${ASSETS.colors.border}`,
-            padding: "28px 28px 20px",
-            boxShadow: "0 2px 32px rgba(0,0,0,0.05)",
+            borderRadius: 14,
+            padding: "18px 24px",
+            marginBottom: 12,
+            textAlign: "center",
           }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 32px" }}>
-
-              {/* Social tasks */}
-              <TaskColumn
-                heading="SOCIAL TASKS"
-                tasks={SOCIAL_TASKS}
-                completedTasks={completedTasks}
-                taskLoading={taskLoading}
-                onTask={handleTask}
-              />
-
-              {/* Interactive tasks */}
-              <TaskColumn
-                heading="INTERACTIVE TASKS"
-                tasks={INTERACTIVE_TASKS}
-                completedTasks={completedTasks}
-                taskLoading={taskLoading}
-                onTask={handleTask}
-              />
-            </div>
-
-            {/* Bottom row */}
             <div style={{
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-              marginTop: 20, paddingTop: 16,
-              borderTop: "1px solid #f2f2f0",
+              fontSize: 10, letterSpacing: 3, color: "#aaa",
+              marginBottom: 6, fontFamily: "system-ui", fontWeight: 600,
             }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12, color: "#888", fontFamily: "system-ui" }}>
-                <span>⏱</span>
-                {canClaim
-                  ? <span style={{ color: ASSETS.colors.gold, fontWeight: 600 }}>Ready to claim!</span>
-                  : <span>Next claim in <strong style={{ color: "#333" }}>{fmt(countdown)}</strong></span>}
-              </div>
-
-              {/* Stars widget */}
-              <div style={{
-                background: ASSETS.colors.bg,
-                border: `1px solid ${ASSETS.colors.border}`,
-                borderRadius: 12, padding: "10px 18px", textAlign: "center",
+              YOUR STARS
+            </div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+              <span style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: 48, fontWeight: 700, color: "#111",
+                fontVariantNumeric: "tabular-nums",
+                lineHeight: 1,
               }}>
-                <div style={{ fontSize: 9, letterSpacing: 2.5, color: "#aaa", marginBottom: 4, fontFamily: "system-ui" }}>
-                  YOUR STARS
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, justifyContent: "center" }}>
-                  <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 700, color: "#111" }}>
-                    {user?.stars ?? 0}
+                {user?.stars ?? 0}
+              </span>
+              <Sparkle size={22} gold />
+            </div>
+          </div>
+
+          {/* ── TASKS PANEL ───────────────────────────────────────────── */}
+          <div style={{
+            background: ASSETS.colors.surface,
+            borderRadius: 14,
+            border: `1px solid ${ASSETS.colors.border}`,
+            padding: "22px 20px 16px",
+            boxShadow: "0 2px 24px rgba(0,0,0,0.04)",
+          }}>
+            {/* Social tasks */}
+            <TaskSection
+              heading="SOCIAL TASKS"
+              tasks={SOCIAL_TASKS}
+              completedTasks={completedTasks}
+              taskLoading={taskLoading}
+              onTask={handleTask}
+            />
+
+            {/* Divider */}
+            <div style={{ height: 1, background: "#f0f0ee", margin: "8px 0 16px" }} />
+
+            {/* Interactive tasks */}
+            <TaskSection
+              heading="INTERACTIVE TASKS"
+              tasks={INTERACTIVE_TASKS}
+              completedTasks={completedTasks}
+              taskLoading={taskLoading}
+              onTask={handleTask}
+            />
+
+            {/* Countdown footer */}
+            <div style={{
+              marginTop: 16, paddingTop: 14,
+              borderTop: "1px solid #f0f0ee",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              gap: 8, fontSize: 13, color: "#888", fontFamily: "system-ui",
+            }}>
+              <span style={{ fontSize: 15 }}>⏱</span>
+              {canClaim
+                ? <span style={{ color: ASSETS.colors.gold, fontWeight: 600 }}>Ready to claim!</span>
+                : (
+                  <span>
+                    Next claim available in{" "}
+                    <strong style={{ color: "#111", fontFamily: "system-ui", letterSpacing: 0.5 }}>
+                      {fmt(countdown)}
+                    </strong>
                   </span>
-                  <StarIcon size={18} gold />
-                </div>
-              </div>
+                )}
             </div>
           </div>
         </div>
@@ -318,7 +364,7 @@ export default function Home() {
 
       {/* ── LIVE FEED ─────────────────────────────────────────────────────── */}
       <section style={{
-        padding: "72px clamp(24px, 8vw, 100px)",
+        padding: "64px clamp(20px, 8vw, 100px)",
         background: ASSETS.colors.surface,
         borderTop: `1px solid ${ASSETS.colors.border}`,
       }}>
@@ -326,10 +372,10 @@ export default function Home() {
           <div style={{ fontSize: 10, letterSpacing: 3, color: ASSETS.colors.gold, marginBottom: 10, fontFamily: "system-ui" }}>
             LIVE
           </div>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: "#111", marginBottom: 6 }}>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 30, color: "#111", marginBottom: 6 }}>
             Star Activity
           </h2>
-          <p style={{ fontSize: 14, color: "#888", marginBottom: 32, fontFamily: "system-ui" }}>
+          <p style={{ fontSize: 14, color: "#888", marginBottom: 28, fontFamily: "system-ui" }}>
             Real-time star claims from the community
           </p>
 
@@ -372,8 +418,8 @@ export default function Home() {
   );
 }
 
-// ── Task column sub-component ──────────────────────────────────────────────────
-function TaskColumn({
+// ── Task section (single-column) ───────────────────────────────────────────────
+function TaskSection({
   heading,
   tasks,
   completedTasks,
@@ -381,53 +427,59 @@ function TaskColumn({
   onTask,
 }: {
   heading: string;
-  tasks: typeof SOCIAL_TASKS;
+  tasks: { id: string; icon: string; label: string; stars: number; href: string | null; internal?: boolean }[];
   completedTasks: string[];
   taskLoading: string | null;
   onTask: (id: string, stars: number, href: string | null, internal?: boolean) => void;
 }) {
   return (
-    <div>
+    <div style={{ marginBottom: 4 }}>
       <div style={{
         fontSize: 10, letterSpacing: 2.5, color: "#aaa",
-        fontWeight: 600, marginBottom: 14,
+        fontWeight: 600, marginBottom: 6,
         fontFamily: "system-ui",
         display: "flex", alignItems: "center", gap: 6,
       }}>
         ✦ {heading}
       </div>
+
       {tasks.map((t) => {
         const done = completedTasks.includes(t.id);
+        const loading = taskLoading === t.id;
         return (
           <div
             key={t.id}
             className="task-row"
-            onClick={() => onTask(t.id, t.stars, t.href, (t as any).internal)}
+            onClick={() => onTask(t.id, t.stars, t.href, t.internal)}
             style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
-              padding: "9px 6px",
-              borderBottom: "1px solid #f2f2f0",
+              padding: "11px 8px",
+              borderBottom: "1px solid #f4f4f2",
               cursor: done ? "default" : "pointer",
-              opacity: done ? 0.5 : 1,
-              borderRadius: 4,
+              opacity: done ? 0.45 : 1,
+              borderRadius: 6,
               transition: "background 0.15s",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, fontFamily: "system-ui" }}>
-              <span style={{ fontSize: 15, width: 18 }}>{t.icon}</span>
-              <span style={{ textDecoration: done ? "line-through" : "none", color: "#333" }}>{t.label}</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 14, fontFamily: "system-ui" }}>
+              <span style={{ fontSize: 16, width: 20, textAlign: "center", flexShrink: 0 }}>{t.icon}</span>
+              <span style={{ textDecoration: done ? "line-through" : "none", color: "#222" }}>
+                {t.label}
+              </span>
             </div>
             <div style={{
-              display: "flex", alignItems: "center", gap: 4,
-              fontSize: 12,
-              color: done ? ASSETS.colors.gold : "#666",
-              fontWeight: 600, fontFamily: "system-ui", whiteSpace: "nowrap",
+              display: "flex", alignItems: "center", gap: 5,
+              fontSize: 13, fontWeight: 600,
+              color: done ? ASSETS.colors.gold : "#555",
+              fontFamily: "system-ui", whiteSpace: "nowrap", flexShrink: 0,
             }}>
-              {taskLoading === t.id
+              {loading
                 ? <span style={{ animation: "pulse 1s infinite" }}>…</span>
-                : done ? "✓" : `+ ${t.stars}`}
-              <svg width={11} height={11} viewBox="0 0 24 24" fill={done ? ASSETS.colors.gold : "currentColor"}>
-                <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
+                : done
+                  ? "✓"
+                  : `+ ${t.stars}`}
+              <svg width={12} height={12} viewBox="0 0 24 24" fill={done ? ASSETS.colors.gold : "#999"}>
+                <path d="M12 2 L13.5 10.5 L22 12 L13.5 13.5 L12 22 L10.5 13.5 L2 12 L10.5 10.5 Z" />
               </svg>
             </div>
           </div>
@@ -436,4 +488,3 @@ function TaskColumn({
     </div>
   );
 }
-        
