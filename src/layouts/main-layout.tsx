@@ -2,14 +2,15 @@ import { ReactNode, useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { signInWithX, signOut } from "@/lib/supabase";
 import { useAuth } from "@/hooks/useAuth";
-import { Star, LogOut, Menu, X as XIcon } from "lucide-react";
+import { Star, LogOut } from "lucide-react";
 import { ASSETS } from "@/lib/assets";
 
 const NAV_LINKS = [
   { label: "About",       href: "/about" },
   { label: "Lore",        href: "/lore" },
   { label: "Tasks",       href: "/" },
-  { label: "Leaderboard", href: "/leaderboard" },
+  { label: "Roadmap",     href: "/roadmap" },
+  { label: "FAQ",         href: "/faq" },
 ];
 
 export function MainLayout({ children }: { children: ReactNode }) {
@@ -42,10 +43,11 @@ export function MainLayout({ children }: { children: ReactNode }) {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Cormorant+Garamond:wght@300;400;600&display=swap');
 
+        * { box-sizing: border-box; }
+
         .nav-link { transition: color 0.2s; }
         .nav-link:hover { color: #111 !important; }
 
-        /* Mobile full-screen drawer */
         .mobile-drawer {
           position: fixed; inset: 0; z-index: 200;
           display: flex; flex-direction: column;
@@ -66,16 +68,31 @@ export function MainLayout({ children }: { children: ReactNode }) {
         .mobile-nav-link.active { color: #111; font-weight: 700; }
         .mobile-nav-link:hover  { color: #111; background: rgba(201,168,76,0.04); }
 
-        /* Hide desktop links on mobile, show hamburger */
+        .connect-x-btn {
+          background: transparent;
+          border: 1.5px solid #111;
+          border-radius: 100px;
+          padding: 8px 18px;
+          font-size: 13px;
+          font-family: system-ui, sans-serif;
+          letter-spacing: 0.4px;
+          cursor: pointer;
+          color: #111;
+          display: flex; align-items: center; gap: 7px;
+          transition: background 0.2s;
+          white-space: nowrap;
+        }
+        .connect-x-btn:hover { background: rgba(0,0,0,0.05); }
+
         @media (max-width: 768px) {
-          .desktop-links  { display: none !important; }
-          .desktop-auth   { display: none !important; }
-          .hamburger-btn  { display: flex !important; }
+          .desktop-links { display: none !important; }
+          .desktop-auth  { display: none !important; }
+          .hamburger-btn { display: flex !important; }
         }
         @media (min-width: 769px) {
-          .mobile-drawer  { display: none !important; }
-          .hamburger-btn  { display: none !important; }
-          .mobile-stars   { display: none !important; }
+          .mobile-drawer { display: none !important; }
+          .hamburger-btn { display: none !important; }
+          .mobile-stars  { display: none !important; }
         }
       `}</style>
 
@@ -84,14 +101,13 @@ export function MainLayout({ children }: { children: ReactNode }) {
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
         display: "flex", alignItems: "center", justifyContent: "space-between",
         padding: "0 clamp(20px, 5vw, 56px)", height: 68,
-        background: scrolled ? "rgba(248,247,244,0.97)" : "rgba(248,247,244,0.92)",
+        background: scrolled ? "rgba(240,239,237,0.97)" : "rgba(240,239,237,0.92)",
         backdropFilter: "blur(20px)",
         borderBottom: `1px solid ${scrolled ? "rgba(0,0,0,0.09)" : "rgba(0,0,0,0.05)"}`,
         boxShadow: scrolled ? "0 2px 20px rgba(0,0,0,0.05)" : "none",
         transition: "box-shadow 0.3s, border-color 0.3s, background 0.3s",
       }}>
-
-        {/* Logo — image only, text fallback hidden until image errors */}
+        {/* Logo */}
         <Link href="/">
           <a style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
             <img
@@ -104,7 +120,6 @@ export function MainLayout({ children }: { children: ReactNode }) {
                 if (txt) txt.style.display = "block";
               }}
             />
-            {/* Text fallback — hidden by default */}
             <span style={{
               display: "none",
               fontFamily: "'Playfair Display', serif",
@@ -124,7 +139,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
                 color: isActive(href) ? "#111" : "#888",
                 fontWeight: isActive(href) ? 700 : 400,
                 fontFamily: "system-ui, sans-serif",
-                fontSize: 13, letterSpacing: 1.5,
+                fontSize: 13, letterSpacing: 1px,
               }}>
                 {label}
               </a>
@@ -137,7 +152,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
           <AuthArea user={user} loading={loading} />
         </div>
 
-        {/* Mobile right side: stars + hamburger */}
+        {/* Mobile right: stars pill + hamburger */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {user && (
             <div className="mobile-stars" style={{
@@ -149,35 +164,41 @@ export function MainLayout({ children }: { children: ReactNode }) {
               <Star size={11} style={{ color: ASSETS.colors.gold, fill: ASSETS.colors.gold }} />
               <span style={{
                 fontSize: 13, fontWeight: 700, color: "#111",
-                fontFamily: "system-ui",
-                fontVariantNumeric: "tabular-nums",
+                fontFamily: "system-ui", fontVariantNumeric: "tabular-nums",
               }}>
                 {user.stars.toLocaleString()}
               </span>
             </div>
           )}
 
-          {/* Hamburger — bare icon, no border box */}
           <button
             className="hamburger-btn"
             onClick={() => setMenuOpen((o) => !o)}
             aria-label="Toggle menu"
             style={{
-              display: "none", /* overridden by media query */
+              display: "none",
               alignItems: "center", justifyContent: "center",
               background: "transparent", border: "none",
               cursor: "pointer", color: "#111",
               padding: 4, lineHeight: 1,
             }}
           >
-            {menuOpen ? <XIcon size={24} strokeWidth={1.5} /> : <Menu size={24} strokeWidth={1.5} />}
+            {menuOpen
+              ? (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              ) : (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+              )}
           </button>
         </div>
       </nav>
 
       {/* ══ MOBILE DRAWER ═══════════════════════════════════════════════════ */}
       <div className={`mobile-drawer${menuOpen ? " open" : ""}`}>
-        {/* Drawer header */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "0 24px", height: 68,
@@ -205,15 +226,15 @@ export function MainLayout({ children }: { children: ReactNode }) {
             onClick={() => setMenuOpen(false)}
             style={{
               background: "transparent", border: "none",
-              cursor: "pointer", color: "#555", padding: 4, lineHeight: 1,
+              cursor: "pointer", color: "#555", padding: 4,
             }}
-            aria-label="Close menu"
           >
-            <XIcon size={24} strokeWidth={1.5} />
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
           </button>
         </div>
 
-        {/* Nav links */}
         <nav style={{ flex: 1, overflowY: "auto" }}>
           {NAV_LINKS.map(({ label, href }) => (
             <Link key={label} href={href}>
@@ -227,12 +248,10 @@ export function MainLayout({ children }: { children: ReactNode }) {
           ))}
         </nav>
 
-        {/* Drawer footer auth */}
         <div style={{ padding: "28px 40px", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
           <AuthArea user={user} loading={loading} mobile />
         </div>
 
-        {/* Decorative sparkle */}
         <span style={{
           position: "absolute", bottom: 130, right: 36,
           fontSize: 64, color: ASSETS.colors.gold, opacity: 0.07,
@@ -283,10 +302,7 @@ function AuthArea({ user, loading, mobile = false }: { user: any; loading: boole
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
                 <Star size={11} style={{ color: ASSETS.colors.gold, fill: ASSETS.colors.gold }} />
-                <span style={{
-                  fontFamily: "system-ui", fontSize: 12, color: "#777",
-                  fontVariantNumeric: "tabular-nums",
-                }}>
+                <span style={{ fontFamily: "system-ui", fontSize: 12, color: "#777", fontVariantNumeric: "tabular-nums" }}>
                   {user.stars.toLocaleString()} stars
                 </span>
               </div>
@@ -327,22 +343,10 @@ function AuthArea({ user, loading, mobile = false }: { user: any; loading: boole
 
   return (
     <button
+      className="connect-x-btn"
       onClick={() => signInWithX()}
-      style={{
-        background: "#111", color: "#fff",
-        border: "none", borderRadius: mobile ? 10 : 99,
-        padding: mobile ? "14px 28px" : "9px 22px",
-        cursor: "pointer",
-        fontSize: mobile ? 14 : 13,
-        fontFamily: "system-ui", letterSpacing: 0.4,
-        display: "flex", alignItems: "center", gap: 8,
-        width: mobile ? "100%" : "auto",
-        justifyContent: "center",
-        transition: "background 0.2s",
-      }}
     >
       ✦ Connect with X
     </button>
   );
 }
-      
