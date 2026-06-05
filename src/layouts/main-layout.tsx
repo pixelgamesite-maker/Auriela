@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { signInWithX, signOut } from "@/lib/supabase";
 import { useAuth } from "@/hooks/useAuth";
 import { Star, LogOut, Menu, X as XIcon } from "lucide-react";
-import { ASSETS } from "@/assets";
+import { ASSETS } from "@/lib/assets";
 
 const NAV_LINKS = [
   { label: "About",       href: "/about" },
