@@ -18,17 +18,14 @@ export function MainLayout({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  // Close mobile menu on route change
   useEffect(() => { setMenuOpen(false); }, [location]);
 
-  // Elevate navbar on scroll
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Prevent body scroll when mobile menu is open
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
@@ -45,53 +42,40 @@ export function MainLayout({ children }: { children: ReactNode }) {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Cormorant+Garamond:wght@300;400;600&display=swap');
 
-        /* ── Nav link hover ─────────────────────────── */
         .nav-link { transition: color 0.2s; }
         .nav-link:hover { color: #111 !important; }
 
-        /* ── Mobile drawer ──────────────────────────── */
+        /* Mobile full-screen drawer */
         .mobile-drawer {
           position: fixed; inset: 0; z-index: 200;
           display: flex; flex-direction: column;
           background: ${ASSETS.colors.bg};
           transform: translateX(100%);
-          transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .mobile-drawer.open { transform: translateX(0); }
 
-        /* ── Mobile nav link ────────────────────────── */
         .mobile-nav-link {
           display: block; padding: 22px 40px;
           font-family: 'Playfair Display', serif;
-          font-size: 28px; font-weight: 400;
-          text-decoration: none; color: #555;
+          font-size: 28px; font-weight: 400; letter-spacing: 1px;
+          text-decoration: none; color: #666;
           border-bottom: 1px solid rgba(0,0,0,0.05);
-          transition: color 0.2s, background 0.2s;
-          letter-spacing: 1px;
+          transition: color 0.18s, background 0.18s;
         }
         .mobile-nav-link.active { color: #111; font-weight: 700; }
         .mobile-nav-link:hover  { color: #111; background: rgba(201,168,76,0.04); }
 
-        /* ── Hamburger button ───────────────────────── */
-        .hamburger-btn {
-          display: none;
-          background: transparent;
-          border: 1px solid rgba(0,0,0,0.12);
-          border-radius: 8px;
-          padding: 7px 9px;
-          cursor: pointer;
-          color: #111;
-          transition: border-color 0.2s, background 0.2s;
-        }
-        .hamburger-btn:hover { background: rgba(0,0,0,0.04); }
-
-        /* ── Responsive breakpoint ──────────────────── */
+        /* Hide desktop links on mobile, show hamburger */
         @media (max-width: 768px) {
-          .desktop-links { display: none !important; }
-          .hamburger-btn { display: flex !important; align-items: center; justify-content: center; }
+          .desktop-links  { display: none !important; }
+          .desktop-auth   { display: none !important; }
+          .hamburger-btn  { display: flex !important; }
         }
         @media (min-width: 769px) {
-          .mobile-drawer { display: none !important; }
+          .mobile-drawer  { display: none !important; }
+          .hamburger-btn  { display: none !important; }
+          .mobile-stars   { display: none !important; }
         }
       `}</style>
 
@@ -100,27 +84,29 @@ export function MainLayout({ children }: { children: ReactNode }) {
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
         display: "flex", alignItems: "center", justifyContent: "space-between",
         padding: "0 clamp(20px, 5vw, 56px)", height: 68,
-        background: scrolled
-          ? "rgba(248,247,244,0.97)"
-          : "rgba(248,247,244,0.92)",
+        background: scrolled ? "rgba(248,247,244,0.97)" : "rgba(248,247,244,0.92)",
         backdropFilter: "blur(20px)",
-        borderBottom: scrolled
-          ? "1px solid rgba(0,0,0,0.09)"
-          : "1px solid rgba(0,0,0,0.05)",
+        borderBottom: `1px solid ${scrolled ? "rgba(0,0,0,0.09)" : "rgba(0,0,0,0.05)"}`,
+        boxShadow: scrolled ? "0 2px 20px rgba(0,0,0,0.05)" : "none",
         transition: "box-shadow 0.3s, border-color 0.3s, background 0.3s",
-        boxShadow: scrolled ? "0 2px 24px rgba(0,0,0,0.06)" : "none",
       }}>
 
-        {/* Logo */}
+        {/* Logo — image only, text fallback hidden until image errors */}
         <Link href="/">
-          <a style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
+          <a style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
             <img
               src={ASSETS.images.logo}
-              alt="Aurelia"
-              style={{ height: 28 }}
-              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+              alt={ASSETS.brand.name}
+              style={{ height: 32, display: "block" }}
+              onError={(e) => {
+                (e.currentTarget.style.display = "none");
+                const txt = e.currentTarget.nextElementSibling as HTMLElement;
+                if (txt) txt.style.display = "block";
+              }}
             />
+            {/* Text fallback — hidden by default */}
             <span style={{
+              display: "none",
               fontFamily: "'Playfair Display', serif",
               fontSize: 18, letterSpacing: 5, fontWeight: 700, color: "#111",
             }}>
@@ -129,60 +115,62 @@ export function MainLayout({ children }: { children: ReactNode }) {
           </a>
         </Link>
 
-        {/* ── Desktop center links ─────────────────────────────────────────── */}
-        <div
-          className="desktop-links"
-          style={{ display: "flex", gap: 36, fontSize: 13, letterSpacing: 1.5 }}
-        >
+        {/* Desktop center links */}
+        <div className="desktop-links" style={{ display: "flex", gap: 36 }}>
           {NAV_LINKS.map(({ label, href }) => (
             <Link key={label} href={href}>
-              <a
-                className="nav-link"
-                style={{
-                  textDecoration: "none",
-                  color: isActive(href) ? "#111" : "#888",
-                  fontWeight: isActive(href) ? 700 : 400,
-                  fontFamily: "system-ui, sans-serif",
-                  fontSize: 13,
-                  letterSpacing: 1.5,
-                }}
-              >
+              <a className="nav-link" style={{
+                textDecoration: "none",
+                color: isActive(href) ? "#111" : "#888",
+                fontWeight: isActive(href) ? 700 : 400,
+                fontFamily: "system-ui, sans-serif",
+                fontSize: 13, letterSpacing: 1.5,
+              }}>
                 {label}
               </a>
             </Link>
           ))}
         </div>
 
-        {/* ── Desktop right: auth ──────────────────────────────────────────── */}
-        <div className="desktop-links" style={{ display: "flex" }}>
+        {/* Desktop auth */}
+        <div className="desktop-auth" style={{ display: "flex" }}>
           <AuthArea user={user} loading={loading} />
         </div>
 
-        {/* ── Mobile right: stars pill + hamburger ─────────────────────────── */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          {/* Star count pill (mobile only, shown when logged in) */}
+        {/* Mobile right side: stars + hamburger */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {user && (
-            <div style={{
+            <div className="mobile-stars" style={{
               display: "flex", alignItems: "center", gap: 5,
               background: ASSETS.colors.goldLight,
               border: `1px solid ${ASSETS.colors.goldBorder}`,
-              borderRadius: 99, padding: "5px 12px",
+              borderRadius: 99, padding: "4px 11px",
             }}>
-              <Star size={12} style={{ color: ASSETS.colors.gold, fill: ASSETS.colors.gold }} />
-              <span style={{ fontSize: 13, fontWeight: 700, color: "#111", fontFamily: "system-ui" }}>
+              <Star size={11} style={{ color: ASSETS.colors.gold, fill: ASSETS.colors.gold }} />
+              <span style={{
+                fontSize: 13, fontWeight: 700, color: "#111",
+                fontFamily: "system-ui",
+                fontVariantNumeric: "tabular-nums",
+              }}>
                 {user.stars.toLocaleString()}
               </span>
             </div>
           )}
 
+          {/* Hamburger — bare icon, no border box */}
           <button
             className="hamburger-btn"
             onClick={() => setMenuOpen((o) => !o)}
             aria-label="Toggle menu"
+            style={{
+              display: "none", /* overridden by media query */
+              alignItems: "center", justifyContent: "center",
+              background: "transparent", border: "none",
+              cursor: "pointer", color: "#111",
+              padding: 4, lineHeight: 1,
+            }}
           >
-            {menuOpen
-              ? <XIcon size={20} />
-              : <Menu size={20} />}
+            {menuOpen ? <XIcon size={24} strokeWidth={1.5} /> : <Menu size={24} strokeWidth={1.5} />}
           </button>
         </div>
       </nav>
@@ -195,21 +183,33 @@ export function MainLayout({ children }: { children: ReactNode }) {
           padding: "0 24px", height: 68,
           borderBottom: "1px solid rgba(0,0,0,0.06)",
         }}>
+          <img
+            src={ASSETS.images.logo}
+            alt={ASSETS.brand.name}
+            style={{ height: 28 }}
+            onError={(e) => {
+              (e.currentTarget.style.display = "none");
+              const txt = e.currentTarget.nextElementSibling as HTMLElement;
+              if (txt) txt.style.display = "block";
+            }}
+          />
           <span style={{
+            display: "none",
             fontFamily: "'Playfair Display', serif",
             fontSize: 18, letterSpacing: 5, fontWeight: 700, color: "#111",
           }}>
             {ASSETS.brand.name}
           </span>
+
           <button
             onClick={() => setMenuOpen(false)}
             style={{
               background: "transparent", border: "none",
-              cursor: "pointer", color: "#555", padding: 6,
+              cursor: "pointer", color: "#555", padding: 4, lineHeight: 1,
             }}
             aria-label="Close menu"
           >
-            <XIcon size={22} />
+            <XIcon size={24} strokeWidth={1.5} />
           </button>
         </div>
 
@@ -227,34 +227,28 @@ export function MainLayout({ children }: { children: ReactNode }) {
           ))}
         </nav>
 
-        {/* Drawer footer — auth */}
-        <div style={{
-          padding: "28px 40px",
-          borderTop: "1px solid rgba(0,0,0,0.06)",
-        }}>
+        {/* Drawer footer auth */}
+        <div style={{ padding: "28px 40px", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
           <AuthArea user={user} loading={loading} mobile />
         </div>
 
-        {/* Gold sparkle decoration */}
-        <div style={{
-          position: "absolute", bottom: 120, right: 32,
-          fontSize: 48, color: ASSETS.colors.gold, opacity: 0.08,
-          pointerEvents: "none", fontFamily: "serif",
-        }}>✦</div>
+        {/* Decorative sparkle */}
+        <span style={{
+          position: "absolute", bottom: 130, right: 36,
+          fontSize: 64, color: ASSETS.colors.gold, opacity: 0.07,
+          pointerEvents: "none",
+        }}>✦</span>
       </div>
 
       {/* ══ PAGE CONTENT ════════════════════════════════════════════════════ */}
-      <main style={{ paddingTop: 68 }}>
-        {children}
-      </main>
+      <main style={{ paddingTop: 68 }}>{children}</main>
 
       {/* ══ FOOTER ══════════════════════════════════════════════════════════ */}
       <footer style={{
         textAlign: "center", padding: "32px 24px",
-        borderTop: "1px solid rgba(0,0,0,0.07)",
-        fontSize: 12, color: "#aaa",
-        fontFamily: "system-ui",
-        letterSpacing: 1.5,
+        borderTop: `1px solid ${ASSETS.colors.border}`,
+        fontSize: 12, color: "#bbb",
+        fontFamily: "system-ui", letterSpacing: 1.5,
       }}>
         ✦ {ASSETS.brand.name} © {new Date().getFullYear()} ✦
       </footer>
@@ -262,16 +256,8 @@ export function MainLayout({ children }: { children: ReactNode }) {
   );
 }
 
-// ── Auth area (shared by desktop + mobile drawer) ─────────────────────────────
-function AuthArea({
-  user,
-  loading,
-  mobile = false,
-}: {
-  user: any;
-  loading: boolean;
-  mobile?: boolean;
-}) {
+// ── Shared auth area ───────────────────────────────────────────────────────────
+function AuthArea({ user, loading, mobile = false }: { user: any; loading: boolean; mobile?: boolean }) {
   if (loading) return null;
 
   if (user) {
@@ -282,18 +268,13 @@ function AuthArea({
         alignItems: mobile ? "flex-start" : "center",
         gap: mobile ? 16 : 14,
       }}>
-        {/* User info */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {user.x_avatar && (
-            <img
-              src={user.x_avatar}
-              alt={user.x_handle}
-              style={{
-                width: mobile ? 40 : 32, height: mobile ? 40 : 32,
-                borderRadius: "50%",
-                border: `1px solid ${ASSETS.colors.goldBorder}`,
-              }}
-            />
+            <img src={user.x_avatar} alt={user.x_handle} style={{
+              width: mobile ? 40 : 32, height: mobile ? 40 : 32,
+              borderRadius: "50%",
+              border: `1px solid ${ASSETS.colors.goldBorder}`,
+            }} />
           )}
           {mobile && (
             <div>
@@ -302,15 +283,28 @@ function AuthArea({
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
                 <Star size={11} style={{ color: ASSETS.colors.gold, fill: ASSETS.colors.gold }} />
-                <span style={{ fontFamily: "system-ui", fontSize: 12, color: "#666" }}>
+                <span style={{
+                  fontFamily: "system-ui", fontSize: 12, color: "#777",
+                  fontVariantNumeric: "tabular-nums",
+                }}>
                   {user.stars.toLocaleString()} stars
                 </span>
               </div>
             </div>
           )}
+          {!mobile && (
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <Star size={12} style={{ color: ASSETS.colors.gold, fill: ASSETS.colors.gold }} />
+              <span style={{
+                fontSize: 13, fontWeight: 700, color: "#111",
+                fontFamily: "system-ui", fontVariantNumeric: "tabular-nums",
+              }}>
+                {user.stars.toLocaleString()}
+              </span>
+            </div>
+          )}
         </div>
 
-        {/* Sign out */}
         <button
           onClick={() => signOut()}
           style={{
@@ -321,19 +315,16 @@ function AuthArea({
             padding: mobile ? "10px 20px" : "6px 14px",
             cursor: "pointer",
             fontSize: mobile ? 13 : 12,
-            fontFamily: "system-ui",
-            color: "#666",
-            transition: "border-color 0.2s, color 0.2s",
+            fontFamily: "system-ui", color: "#666",
+            transition: "border-color 0.2s",
           }}
         >
-          <LogOut size={mobile ? 14 : 12} />
-          Sign Out
+          <LogOut size={mobile ? 14 : 12} /> Sign Out
         </button>
       </div>
     );
   }
 
-  // Logged out
   return (
     <button
       onClick={() => signInWithX()}
@@ -343,8 +334,7 @@ function AuthArea({
         padding: mobile ? "14px 28px" : "9px 22px",
         cursor: "pointer",
         fontSize: mobile ? 14 : 13,
-        fontFamily: "system-ui",
-        letterSpacing: 0.4,
+        fontFamily: "system-ui", letterSpacing: 0.4,
         display: "flex", alignItems: "center", gap: 8,
         width: mobile ? "100%" : "auto",
         justifyContent: "center",
@@ -355,3 +345,4 @@ function AuthArea({
     </button>
   );
 }
+      
