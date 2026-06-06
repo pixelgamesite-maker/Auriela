@@ -14,14 +14,14 @@ import { ASSETS } from "@/lib/assets";
 
 // ── Task definitions ───────────────────────────────────────────────────────────
 const SOCIAL_TASKS = [
-  { id: "follow_x",      label: "Follow on X",          stars: 10, href: ASSETS.links.x,        icon: "x"        },
-  { id: "join_discord",  label: "Join Discord",          stars: 15, href: ASSETS.links.discord,  icon: "discord"  },
-  { id: "join_telegram", label: "Join Telegram Channel", stars: 10, href: ASSETS.links.telegram, icon: "telegram" },
+  { id: "follow_x",      label: "Follow on X",           stars: 10, href: ASSETS.links.x,        icon: "x"        },
+  { id: "join_discord",  label: "Join Discord",            stars: 15, href: ASSETS.links.discord,  icon: "discord"  },
+  { id: "join_telegram", label: "Join Telegram Channel",   stars: 10, href: ASSETS.links.telegram, icon: "telegram" },
 ];
 
 const INTERACTIVE_TASKS = [
-  { id: "visit_website", label: "Visit Website", stars: 10, href: ASSETS.links.website,    icon: "globe"   },
-  { id: "read_lore",     label: "Read the Lore", stars: 15, href: "/lore", internal: true, icon: "book"    },
+  { id: "visit_website", label: "Visit Website", stars: 10, href: ASSETS.links.website, icon: "globe" },
+  { id: "read_lore",     label: "Read the Lore", stars: 15, href: "/lore", internal: true, icon: "book" },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -166,108 +166,114 @@ export default function Home() {
       <style>{`
         @keyframes fadeUp  { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
         @keyframes pulse   { 0%,100%{opacity:1} 50%{opacity:.35} }
-        @keyframes twinkle { 0%,100%{opacity:.25} 50%{opacity:.65} }
+        @keyframes twinkle { 0%,100%{opacity:.2} 50%{opacity:.6} }
 
         .task-row { transition: background 0.15s; border-radius: 6px; cursor: pointer; }
-        .task-row:hover { background: rgba(201,168,76,0.06) !important; }
-        .task-row-done { opacity: 0.45; cursor: default; }
+        .task-row:hover { background: rgba(201,168,76,0.05) !important; }
+        .task-row-done { opacity: 0.4; cursor: default; }
 
-        .claim-btn:hover:not(:disabled) { background: #2a2a2a !important; }
+        .claim-btn { transition: all 0.2s ease; }
+        .claim-btn:hover:not(:disabled) { background: #222 !important; }
         .claim-btn:active:not(:disabled) { transform: scale(0.97); }
-        .waitlist-btn:hover { background: rgba(0,0,0,0.04) !important; }
+        .waitlist-btn { transition: all 0.2s ease; }
+        .waitlist-btn:hover { background: rgba(0,0,0,0.03) !important; }
 
-        /* ── Desktop: character visible, content left-half ── */
+        /* ── Desktop ── */
         @media (min-width: 769px) {
+          .hero-wrap {
+            min-height: calc(100vh - 68px);
+            display: flex;
+            align-items: flex-start;
+          }
           .hero-content {
-            width: 50% !important;
-            padding: clamp(40px,6vw,72px) clamp(32px,6vw,72px) 60px !important;
+            width: 50%;
+            padding: clamp(48px,5vw,80px) clamp(40px,5vw,80px) 56px;
           }
           .hero-character {
-            position: absolute !important;
-            right: 0 !important; top: 0 !important;
-            height: 100% !important; width: 52% !important;
-            object-fit: contain !important;
-            object-position: right bottom !important;
+            position: absolute;
+            right: 0; top: 0;
+            height: 100%; width: 55%;
+            object-fit: contain;
+            object-position: right center;
           }
           .tasks-grid {
-            display: grid !important;
-            grid-template-columns: 1fr 1fr auto !important;
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
           }
-          .tasks-col-divider { border-right: 1px solid ${ASSETS.colors.border} !important; }
+          .tasks-col-divider { border-right: 1px solid ${ASSETS.colors.border}; }
           .stars-card-mobile { display: none !important; }
         }
 
-        /* ── Mobile: full width, character top-right overlay ── */
+        /* ── Mobile ── */
         @media (max-width: 768px) {
+          .hero-wrap {
+            min-height: auto;
+            display: block;
+          }
           .hero-content {
-            width: 100% !important;
-            padding: 24px 20px 48px !important;
+            width: 100%;
+            padding: 20px 20px 40px;
           }
           .hero-character {
-            position: absolute !important;
-            right: -10px !important; top: 0 !important;
-            height: 55% !important; width: 60% !important;
-            object-fit: contain !important;
-            object-position: right top !important;
+            position: absolute;
+            right: -12px; top: -20px;
+            height: 48%; width: 62%;
+            object-fit: contain;
+            object-position: right top;
+            opacity: 0.9;
           }
           .tasks-grid {
-            display: flex !important;
-            flex-direction: column !important;
+            display: flex;
+            flex-direction: column;
           }
           .tasks-col-divider {
-            border-right: none !important;
-            border-bottom: 1px solid ${ASSETS.colors.border} !important;
+            border-right: none;
+            border-bottom: 1px solid ${ASSETS.colors.border};
           }
           .cta-row {
             flex-direction: column !important;
           }
-          /* Hide the stars column inside the grid on mobile */
           .stars-col-grid { display: none !important; }
         }
       `}</style>
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
-      <section style={{
+      <section className="hero-wrap" style={{
         position: "relative",
-        minHeight: "calc(100vh - 68px)",
         overflow: "hidden",
         background: ASSETS.colors.bg,
-        display: "flex",
-        alignItems: "flex-start",
       }}>
-        {/* Character — always rendered, sized/positioned via CSS media queries */}
+        {/* Character */}
         <img
           className="hero-character"
           src={ASSETS.images.character}
           alt="Aurelia"
           style={{
             pointerEvents: "none",
-            userSelect: "none" as const,
+            userSelect: "none",
             zIndex: 1,
           }}
           onError={(e) => { (e.currentTarget.style.display = "none"); }}
         />
 
         {/* Sparkles */}
-        {([[6,6],[12,58],[20,84],[70,7],[78,70],[90,32],[52,93],[40,3]] as [number,number][]).map(([t,l], i) => (
+        {([[8,5],[14,55],[22,82],[68,8],[76,68],[88,30],[50,90],[38,5]] as [number,number][]).map(([t,l], i) => (
           <span key={i} style={{
             position: "absolute", top: `${t}%`, left: `${l}%`,
-            color: ASSETS.colors.gold, opacity: 0.3,
-            fontSize: i % 2 === 0 ? 9 : 16, pointerEvents: "none",
-            animation: `twinkle ${2.2 + i * 0.25}s ease-in-out infinite`,
+            color: ASSETS.colors.gold, opacity: 0.25,
+            fontSize: i % 2 === 0 ? 8 : 14, pointerEvents: "none",
+            animation: `twinkle ${2.4 + i * 0.3}s ease-in-out infinite`,
+            zIndex: 2,
           }}>✦</span>
         ))}
 
         {/* Content */}
-        <div
-          className="hero-content"
-          style={{ position: "relative", zIndex: 2 }}
-        >
+        <div className="hero-content" style={{ position: "relative", zIndex: 3 }}>
           {/* Logo */}
           <img
             src={ASSETS.images.logo}
             alt={ASSETS.brand.name}
-            style={{ height: 72, marginBottom: 8, display: "block", maxWidth: "80vw" }}
+            style={{ height: 68, marginBottom: 10, display: "block", maxWidth: "80vw" }}
             onError={(e) => {
               (e.currentTarget.style.display = "none");
               const fb = document.getElementById("hero-brand-fallback");
@@ -277,34 +283,35 @@ export default function Home() {
           <div id="hero-brand-fallback" style={{
             display: "none",
             fontFamily: "'Playfair Display', serif",
-            fontSize: 38, letterSpacing: 6, fontWeight: 700, color: "#111", marginBottom: 4,
+            fontSize: 36, letterSpacing: 6, fontWeight: 700, color: "#111", marginBottom: 4,
           }}>
             {ASSETS.brand.name}
           </div>
 
           {/* Decorative rule */}
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 20 }}>
-            <div style={{ height: 1, width: 22, background: "#d0cfc9" }} />
-            <Sparkle size={7} color="#bbb" />
-            <Sparkle size={9} color="#bbb" />
-            <Sparkle size={7} color="#bbb" />
-            <div style={{ height: 1, width: 22, background: "#d0cfc9" }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 22 }}>
+            <div style={{ height: 1, width: 20, background: "#d8d7d2" }} />
+            <Sparkle size={6} color="#c0bfb8" />
+            <Sparkle size={8} color="#c0bfb8" />
+            <Sparkle size={6} color="#c0bfb8" />
+            <div style={{ height: 1, width: 20, background: "#d8d7d2" }} />
           </div>
 
           <h1 style={{
             fontFamily: "'Playfair Display', serif",
-            fontSize: "clamp(48px, 8vw, 80px)",
+            fontSize: "clamp(44px, 7vw, 76px)",
             fontWeight: 700, lineHeight: 1.05,
             color: ASSETS.colors.ink, margin: "0 0 14px",
+            letterSpacing: "-0.02em",
           }}>
             Secure<br />Your Spot
           </h1>
 
           <p style={{
-            fontFamily: "system-ui, sans-serif",
+            fontFamily: "system-ui, -apple-system, sans-serif",
             fontSize: 14, color: ASSETS.colors.muted,
-            marginBottom: 28, letterSpacing: 0.2, lineHeight: 1.6,
-            maxWidth: 340,
+            marginBottom: 26, letterSpacing: 0.15, lineHeight: 1.55,
+            maxWidth: 320,
           }}>
             {ASSETS.brand.description}
           </p>
@@ -312,7 +319,7 @@ export default function Home() {
           {/* CTAs */}
           <div
             className="cta-row"
-            style={{ display: "flex", flexDirection: "row", gap: 10, marginBottom: 14, maxWidth: 420 }}
+            style={{ display: "flex", flexDirection: "row", gap: 10, marginBottom: 12, maxWidth: 400 }}
           >
             <button
               className="claim-btn"
@@ -321,16 +328,15 @@ export default function Home() {
               style={{
                 flex: 1,
                 background: ASSETS.colors.ink, color: "#fff",
-                border: "none", borderRadius: 8,
-                padding: "15px 24px", fontSize: 14,
+                border: "none", borderRadius: 10,
+                padding: "14px 22px", fontSize: 13,
                 cursor: (!!user && !canClaim) ? "not-allowed" : "pointer",
                 fontFamily: "system-ui", letterSpacing: 0.5, fontWeight: 500,
-                transition: "background 0.2s, transform 0.1s",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                opacity: (!!user && !canClaim) ? 0.5 : 1,
+                opacity: (!!user && !canClaim) ? 0.45 : 1,
               }}
             >
-              <Sparkle size={12} color="#fff" />
+              <Sparkle size={11} color="#fff" />
               {claiming ? "Claiming…" : "Claim Stars"}
             </button>
 
@@ -339,22 +345,21 @@ export default function Home() {
               onClick={() => signInWithX()}
               style={{
                 flex: 1,
-                background: "transparent", color: ASSETS.colors.ink,
-                border: `1.5px solid ${ASSETS.colors.ink}`, borderRadius: 8,
-                padding: "14px 24px", fontSize: 14, cursor: "pointer",
+                background: ASSETS.colors.surface, color: ASSETS.colors.ink,
+                border: `1.5px solid ${ASSETS.colors.ink}`, borderRadius: 10,
+                padding: "13px 22px", fontSize: 13, cursor: "pointer",
                 fontFamily: "system-ui", letterSpacing: 0.5, fontWeight: 500,
-                transition: "background 0.2s",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
               }}
             >
-              <Sparkle size={12} color={ASSETS.colors.ink} />
+              <Sparkle size={11} color={ASSETS.colors.ink} />
               Join Waitlist
             </button>
           </div>
 
           {claimMsg && (
             <p style={{
-              fontSize: 13, color: ASSETS.colors.gold, marginBottom: 8,
+              fontSize: 12, color: ASSETS.colors.gold, marginBottom: 8,
               animation: "fadeUp 0.3s ease", fontFamily: "system-ui",
             }}>
               {claimMsg}
@@ -362,8 +367,8 @@ export default function Home() {
           )}
 
           <p style={{
-            fontSize: 12, color: "#bbb", letterSpacing: 0.3,
-            marginBottom: 28, fontFamily: "system-ui",
+            fontSize: 11, color: "#bbb", letterSpacing: 0.4,
+            marginBottom: 32, fontFamily: "system-ui",
           }}>
             ✦ {ASSETS.brand.priorityNote} ✦
           </p>
@@ -372,40 +377,40 @@ export default function Home() {
           <div style={{
             background: ASSETS.colors.surface,
             border: `1px solid ${ASSETS.colors.border}`,
-            borderRadius: 16,
+            borderRadius: 18,
             overflow: "hidden",
-            boxShadow: "0 2px 24px rgba(0,0,0,0.05)",
+            boxShadow: "0 1px 16px rgba(0,0,0,0.03)",
           }}>
 
-            {/* Your Stars — mobile only, full-width above tasks */}
+            {/* Your Stars — mobile only */}
             <div className="stars-card-mobile" style={{
-              padding: "20px 24px",
+              padding: "18px 20px",
               borderBottom: `1px solid ${ASSETS.colors.border}`,
               textAlign: "center",
             }}>
               <div style={{
-                fontSize: 10, letterSpacing: 3, color: "#aaa",
+                fontSize: 10, letterSpacing: 3, color: "#bbb",
                 fontFamily: "system-ui", fontWeight: 600, marginBottom: 6,
               }}>
                 YOUR STARS
               </div>
-              <div style={{ height: 1, width: 32, background: ASSETS.colors.goldBorder, margin: "0 auto 12px" }} />
+              <div style={{ height: 1, width: 28, background: ASSETS.colors.goldBorder, margin: "0 auto 10px" }} />
               <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
                 <span style={{
                   fontFamily: "'Playfair Display', serif",
-                  fontSize: 52, fontWeight: 700, color: ASSETS.colors.ink,
+                  fontSize: 48, fontWeight: 700, color: ASSETS.colors.ink,
                   lineHeight: 1, fontVariantNumeric: "tabular-nums",
                 }}>
                   {user?.stars ?? 0}
                 </span>
-                <Sparkle size={20} color={ASSETS.colors.gold} />
+                <Sparkle size={18} color={ASSETS.colors.gold} />
               </div>
             </div>
 
             <div className="tasks-grid">
 
               {/* Social Tasks */}
-              <div className="tasks-col-divider" style={{ padding: "20px 20px 16px" }}>
+              <div className="tasks-col-divider" style={{ padding: "18px 18px 14px" }}>
                 <SectionHead label="SOCIAL TASKS" />
                 {SOCIAL_TASKS.map((t) => (
                   <TaskRow
@@ -418,7 +423,7 @@ export default function Home() {
               </div>
 
               {/* Interactive Tasks */}
-              <div className="tasks-col-divider" style={{ padding: "20px 20px 16px" }}>
+              <div className="tasks-col-divider" style={{ padding: "18px 18px 14px" }}>
                 <SectionHead label="INTERACTIVE TASKS" />
                 {INTERACTIVE_TASKS.map((t) => (
                   <TaskRow
@@ -432,41 +437,41 @@ export default function Home() {
 
               {/* Your Stars — desktop only */}
               <div className="stars-col-grid" style={{
-                padding: "20px 28px",
+                padding: "18px 26px",
                 display: "flex", flexDirection: "column",
                 alignItems: "center", justifyContent: "center",
-                minWidth: 150,
+                minWidth: 140,
               }}>
                 <div style={{
-                  fontSize: 10, letterSpacing: 3, color: "#aaa",
+                  fontSize: 10, letterSpacing: 3, color: "#bbb",
                   fontFamily: "system-ui", fontWeight: 600,
                   marginBottom: 8, textAlign: "center",
                 }}>
                   YOUR STARS
                 </div>
-                <div style={{ height: 1, width: 32, background: ASSETS.colors.goldBorder, marginBottom: 12 }} />
+                <div style={{ height: 1, width: 28, background: ASSETS.colors.goldBorder, marginBottom: 10 }} />
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{
                     fontFamily: "'Playfair Display', serif",
-                    fontSize: 52, fontWeight: 700, color: ASSETS.colors.ink,
+                    fontSize: 48, fontWeight: 700, color: ASSETS.colors.ink,
                     lineHeight: 1, fontVariantNumeric: "tabular-nums",
                   }}>
                     {user?.stars ?? 0}
                   </span>
-                  <Sparkle size={20} color={ASSETS.colors.gold} />
+                  <Sparkle size={18} color={ASSETS.colors.gold} />
                 </div>
               </div>
             </div>
 
-            {/* Countdown — full-width footer */}
+                        {/* Countdown footer */}
             <div style={{
               borderTop: `1px solid ${ASSETS.colors.border}`,
-              padding: "13px 20px",
+              padding: "12px 18px",
               display: "flex", alignItems: "center", justifyContent: "center",
-              gap: 8, fontSize: 13, color: "#888",
+              gap: 8, fontSize: 12, color: "#999",
               fontFamily: "system-ui",
             }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="1.8">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="1.8">
                 <circle cx="12" cy="12" r="10"/>
                 <polyline points="12 6 12 12 16 14"/>
               </svg>
@@ -475,7 +480,7 @@ export default function Home() {
                 : (
                   <span>
                     Next claim available in{" "}
-                    <strong style={{ color: ASSETS.colors.ink, letterSpacing: 0.5 }}>
+                    <strong style={{ color: ASSETS.colors.ink, letterSpacing: 0.5, fontWeight: 600 }}>
                       {fmt(countdown)}
                     </strong>
                   </span>
@@ -487,18 +492,18 @@ export default function Home() {
 
       {/* ── LIVE FEED ─────────────────────────────────────────────────────── */}
       <section style={{
-        padding: "64px clamp(20px, 8vw, 100px)",
+        padding: "56px clamp(20px, 8vw, 100px)",
         background: ASSETS.colors.surface,
         borderTop: `1px solid ${ASSETS.colors.border}`,
       }}>
-        <div style={{ maxWidth: 560 }}>
-          <div style={{ fontSize: 10, letterSpacing: 3, color: ASSETS.colors.gold, marginBottom: 10, fontFamily: "system-ui" }}>
+        <div style={{ maxWidth: 520, margin: "0 auto" }}>
+          <div style={{ fontSize: 10, letterSpacing: 3, color: ASSETS.colors.gold, marginBottom: 10, fontFamily: "system-ui", fontWeight: 600 }}>
             LIVE
           </div>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 30, color: "#111", marginBottom: 6 }}>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: "#111", marginBottom: 6, fontWeight: 700 }}>
             Star Activity
           </h2>
-          <p style={{ fontSize: 14, color: "#888", marginBottom: 28, fontFamily: "system-ui" }}>
+          <p style={{ fontSize: 13, color: "#999", marginBottom: 24, fontFamily: "system-ui" }}>
             Real-time star claims from the community
           </p>
 
@@ -506,21 +511,21 @@ export default function Home() {
             {feed.length === 0
               ? Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} style={{
-                    height: 56, background: ASSETS.colors.bg,
+                    height: 52, background: ASSETS.colors.bg,
                     borderRadius: 10, animation: "pulse 1.5s infinite",
                   }} />
                 ))
               : feed.map((item, i) => (
                   <div key={item.id} style={{
                     display: "flex", alignItems: "center", justifyContent: "space-between",
-                    padding: "12px 16px",
+                    padding: "10px 14px",
                     background: i === 0 ? ASSETS.colors.goldLight : ASSETS.colors.bg,
                     borderRadius: 10,
                     border: i === 0 ? `1px solid ${ASSETS.colors.goldBorder}` : "1px solid transparent",
                     animation: i === 0 ? "fadeUp 0.4s ease" : "none",
                   }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <Avatar src={item.x_avatar} handle={item.x_handle} size={34} />
+                      <Avatar src={item.x_avatar} handle={item.x_handle} size={32} />
                       <div style={{ fontFamily: "system-ui" }}>
                         <span style={{ fontWeight: 600, fontSize: 13, color: "#111" }}>{item.x_handle}</span>
                         <span style={{ fontSize: 12, color: "#888", marginLeft: 6 }}>claimed</span>
@@ -545,7 +550,7 @@ export default function Home() {
 function SectionHead({ label }: { label: string }) {
   return (
     <div style={{
-      fontSize: 10, letterSpacing: 2.5, color: "#aaa",
+      fontSize: 10, letterSpacing: 2.5, color: "#bbb",
       fontFamily: "system-ui", fontWeight: 600,
       marginBottom: 10,
       display: "flex", alignItems: "center", gap: 6,
@@ -575,8 +580,8 @@ function TaskRow({
       onClick={() => !done && onTask(task.id, task.stars, task.href, task.internal)}
       style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "11px 8px",
-        borderBottom: "1px solid #f4f4f2",
+        padding: "10px 6px",
+        borderBottom: "1px solid #f5f5f3",
       }}
     >
       <div style={{
@@ -585,9 +590,9 @@ function TaskRow({
         minWidth: 0,
       }}>
         <span style={{
-          width: 22, height: 22, flexShrink: 0,
+          width: 20, height: 20, flexShrink: 0,
           display: "flex", alignItems: "center", justifyContent: "center",
-          color: "#444",
+          color: "#555",
         }}>
           <TaskIcon name={task.icon} />
         </span>
@@ -608,7 +613,7 @@ function TaskRow({
         {loading
           ? <span style={{ animation: "pulse 1s infinite" }}>…</span>
           : done ? "✓" : `+ ${task.stars}`}
-        <svg width="11" height="11" viewBox="0 0 24 24" fill={done ? ASSETS.colors.gold : "#ccc"}>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill={done ? ASSETS.colors.gold : "#d0d0d0"}>
           <path d="M12 2 L13.2 10.8 L22 12 L13.2 13.2 L12 22 L10.8 13.2 L2 12 L10.8 10.8 Z" />
         </svg>
       </div>
