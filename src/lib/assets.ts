@@ -7,7 +7,7 @@ export const ASSETS = {
   // ── Images ──────────────────────────────────────────────────────────────────
   images: {
     /** Main character illustration (Aurelia figure with flower) */
-    character: `${SUPABASE_STORAGE}/Auriela.png`,
+    character: `${SUPABASE_STORAGE}/Auriela2.png`,
     /** Wordmark / logo lockup */
     logo: `${SUPABASE_STORAGE}/Aurelia-logo.png`,
   },
@@ -16,7 +16,7 @@ export const ASSETS = {
   brand: {
     name: "AURELIA",
     tagline: "Secure Your Spot",
-    description: "Complete tasks and claim stars every 2 hours.",
+    description: "Complete tasks and claim stars every 5 hours.",
     priorityNote: "The more stars you collect, the higher your priority.",
   },
 
@@ -31,14 +31,14 @@ export const ASSETS = {
   // ── Colors (mirrors CSS vars for use in inline styles / JS) ─────────────────
   colors: {
     gold: "#C9A84C",
-    goldLight: "rgba(201,168,76,0.12)",
-    goldBorder: "rgba(201,168,76,0.25)",
+    goldLight: "rgba(201,168,76,0.08)",
+    goldBorder: "rgba(201,168,76,0.22)",
     bg: "#F8F7F4",
     surface: "#FFFFFF",
     ink: "#111111",
     muted: "#777777",
     faint: "#AAAAAA",
-    border: "rgba(0,0,0,0.07)",
+    border: "rgba(0,0,0,0.06)",
   },
 } as const;
 
