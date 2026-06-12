@@ -1,6 +1,5 @@
 import { ReactNode, useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { signInWithX, signOut } from "@/lib/supabase";
 import { useAuth } from "@/hooks/useAuth";
 import { Star, LogOut } from "lucide-react";
 import { ASSETS } from "@/lib/assets";
@@ -9,15 +8,14 @@ const NAV_LINKS = [
   { label: "About",       href: "/about" },
   { label: "Lore",        href: "/lore" },
   { label: "Tasks",       href: "/" },
-  { label: "Roadmap",     href: "/roadmap" },
-  { label: "FAQ",         href: "/faq" },
+  { label: "Leaderboard", href: "/leaderboard" },
 ];
 
 export function MainLayout({ children }: { children: ReactNode }) {
-  const [location]        = useLocation();
-  const { user, loading } = useAuth();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [location]                      = useLocation();
+  const { user, loading, signInWithTwitter, signOut } = useAuth();
+  const [menuOpen, setMenuOpen]         = useState(false);
+  const [scrolled, setScrolled]         = useState(false);
 
   useEffect(() => { setMenuOpen(false); }, [location]);
 
@@ -149,7 +147,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
 
         {/* Desktop auth */}
         <div className="desktop-auth" style={{ display: "flex" }}>
-          <AuthArea user={user} loading={loading} />
+          <AuthArea user={user} loading={loading} signIn={signInWithTwitter} signOut={signOut} />
         </div>
 
         {/* Mobile right: stars pill + hamburger */}
@@ -249,7 +247,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
         </nav>
 
         <div style={{ padding: "28px 40px", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
-          <AuthArea user={user} loading={loading} mobile />
+          <AuthArea user={user} loading={loading} signIn={signInWithTwitter} signOut={signOut} mobile />
         </div>
 
         <span style={{
@@ -276,7 +274,15 @@ export function MainLayout({ children }: { children: ReactNode }) {
 }
 
 // ── Shared auth area ───────────────────────────────────────────────────────────
-function AuthArea({ user, loading, mobile = false }: { user: any; loading: boolean; mobile?: boolean }) {
+function AuthArea({
+  user, loading, signIn, signOut, mobile = false,
+}: {
+  user: any;
+  loading: boolean;
+  signIn: () => Promise<void>;
+  signOut: () => Promise<void>;
+  mobile?: boolean;
+}) {
   if (loading) return null;
 
   if (user) {
@@ -342,11 +348,9 @@ function AuthArea({ user, loading, mobile = false }: { user: any; loading: boole
   }
 
   return (
-    <button
-      className="connect-x-btn"
-      onClick={() => signInWithX()}
-    >
+    <button className="connect-x-btn" onClick={() => signIn()}>
       ✦ Connect with X
     </button>
   );
 }
+              
