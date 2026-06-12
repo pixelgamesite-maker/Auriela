@@ -1,12 +1,12 @@
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthProvider } from "@/hooks/useAuth";
+import { AuthProvider } from "@/lib/useAuth";
 
 import Home from "@/pages/home";
 import Leaderboard from "@/pages/leaderboard";
 import Lore from "@/pages/lore";
 import About from "@/pages/about";
-import AuthCallback from "@/pages/auth-callback";
+import AuthCallback from "@/pages/auth/auth-callback";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
