@@ -128,23 +128,6 @@ function GatedLanding({ onSignIn }: { onSignIn: () => void }) {
         }}>✦</span>
       ))}
 
-      {/* Character image — right side, large */}
-      <img
-        src={ASSETS.images.character}
-        alt="Aurelia"
-        style={{
-          position: "absolute",
-          right: 0, bottom: 0,
-          height: "85%",
-          maxWidth: "55%",
-          objectFit: "contain",
-          objectPosition: "right bottom",
-          pointerEvents: "none",
-          opacity: 0.9,
-        }}
-        onError={(e) => { e.currentTarget.style.display = "none"; }}
-      />
-
       {/* Content */}
       <div style={{
         position: "relative", zIndex: 2,
@@ -155,7 +138,7 @@ function GatedLanding({ onSignIn }: { onSignIn: () => void }) {
         <img
           src={ASSETS.images.logo}
           alt={ASSETS.brand.name}
-          style={{ height: 56, marginBottom: 32, display: "block" }}
+          style={{ height: 80, marginBottom: 52, display: "block" }}
           onError={(e) => {
             e.currentTarget.style.display = "none";
             const fb = document.getElementById("gate-brand-fallback");
@@ -165,36 +148,10 @@ function GatedLanding({ onSignIn }: { onSignIn: () => void }) {
         <div id="gate-brand-fallback" style={{
           display: "none",
           fontFamily: "'Playfair Display', serif",
-          fontSize: 32, letterSpacing: 6, fontWeight: 700, color: "#111", marginBottom: 32,
+          fontSize: 36, letterSpacing: 8, fontWeight: 700, color: "#111", marginBottom: 52,
         }}>
           {ASSETS.brand.name}
         </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 28 }}>
-          <div style={{ height: 1, width: 24, background: "#ddd" }} />
-          <Sparkle size={7} color="#ccc" />
-          <Sparkle size={9} color="#ccc" />
-          <Sparkle size={7} color="#ccc" />
-          <div style={{ height: 1, width: 24, background: "#ddd" }} />
-        </div>
-
-        <h1 style={{
-          fontFamily: "'Playfair Display', serif",
-          fontSize: "clamp(32px, 6vw, 52px)",
-          fontWeight: 700, lineHeight: 1.1,
-          color: "#111", margin: "0 0 12px",
-          letterSpacing: "-0.02em",
-        }}>
-          Secure Your Spot
-        </h1>
-
-        <p style={{
-          fontFamily: "system-ui, sans-serif",
-          fontSize: 14, color: "#888",
-          marginBottom: 36, lineHeight: 1.6, maxWidth: 320,
-        }}>
-          {ASSETS.brand.description}
-        </p>
 
         <button
           onClick={onSignIn}
