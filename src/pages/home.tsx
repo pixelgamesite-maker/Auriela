@@ -321,25 +321,32 @@ export default function Home() {
 
         /* ── Mobile ── */
         @media (max-width: 768px) {
-          .hero-wrap { min-height: auto; display: block; position: relative; }
-          .hero-content { width: 100%; padding: 28px 24px 40px; }
+          .hero-wrap { min-height: auto; display: block; position: relative; overflow: visible; }
+          .hero-content { width: 100%; padding: 20px 22px 24px; }
           .hero-character {
             position: absolute;
-            right: -8px; top: 0;
-            height: 52%; width: 60%;
+            right: 0; top: 0;
+            height: 100%; width: 55%;
             object-fit: contain;
             object-position: right top;
-            opacity: 0.9;
+            opacity: 1;
+            pointer-events: none;
           }
         }
       `}</style>
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
-      <section className="hero-wrap" style={{
-        position: "relative",
-        overflow: "hidden",
+      <section style={{
         background: "#fff",
+        paddingBottom: 0,
       }}>
+        {/* Top block: text left, character right */}
+        <div className="hero-wrap" style={{
+          position: "relative",
+          overflow: "hidden",
+          background: "#fff",
+          minHeight: 340,
+        }}>
         <img
           className="hero-character"
           src={ASSETS.images.character}
@@ -364,7 +371,7 @@ export default function Home() {
           <img
             src={ASSETS.images.logo}
             alt={ASSETS.brand.name}
-            style={{ height: 52, marginBottom: 6, display: "block", maxWidth: "70vw" }}
+            style={{ height: 32, marginBottom: 6, display: "block", maxWidth: "50vw" }}
             onError={(e) => {
               e.currentTarget.style.display = "none";
               const fb = document.getElementById("hero-brand-fallback");
@@ -374,7 +381,7 @@ export default function Home() {
           <div id="hero-brand-fallback" style={{
             display: "none",
             fontFamily: "'Playfair Display', serif",
-            fontSize: "clamp(36px,6vw,56px)",
+            fontSize: "clamp(22px,4vw,32px)",
             letterSpacing: 6, fontWeight: 700, color: "#111",
             marginBottom: 6, lineHeight: 1,
           }}>
@@ -390,34 +397,34 @@ export default function Home() {
             <div style={{ height: 1, width: 16, background: "#ddd" }} />
           </div>
 
-          {/* Heading — scaled down further */}
+          {/* Heading — lighter weight, single line */}
           <h1 style={{
             fontFamily: "'Playfair Display', serif",
-            fontSize: "clamp(18px, 2.8vw, 28px)",
-            fontWeight: 400,
-            lineHeight: 1.1,
+            fontSize: "clamp(24px, 4vw, 38px)",
+            fontWeight: 700,
+            lineHeight: 1.15,
             color: "#111",
-            margin: "0 0 10px",
+            margin: "0 0 8px",
             letterSpacing: "-0.01em",
           }}>
             Secure Your Spot
           </h1>
 
-          {/* Subtitle */}
+          {/* Subtitle — centered, tight, 2 lines like mockup */}
           <p style={{
             fontFamily: "system-ui, -apple-system, sans-serif",
-            fontSize: 13,
+            fontSize: 12,
             color: "#888",
-            marginBottom: 24,
+            marginBottom: 20,
             lineHeight: 1.6,
-            maxWidth: 220,
-            textAlign: "center",
+            maxWidth: 200,
+            textAlign: "left",
           }}>
             Complete tasks and claim stars<br />every 5 hours.
           </p>
 
-          {/* Buttons — scaled down further */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 14, width: "100%", maxWidth: 200 }}>
+          {/* Buttons — short, pill-shaped, not full width */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 14, width: "100%", maxWidth: 220 }}>
             <button
               className="claim-btn"
               onClick={handleClaim}
@@ -425,7 +432,7 @@ export default function Home() {
               style={{
                 background: "#111", color: "#fff",
                 border: "none", borderRadius: 100,
-                padding: "8px 16px", fontSize: 11,
+                padding: "12px 20px", fontSize: 13,
                 cursor: !canClaim ? "not-allowed" : "pointer",
                 fontFamily: "system-ui", letterSpacing: 0.4, fontWeight: 500,
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
@@ -433,7 +440,7 @@ export default function Home() {
                 width: "100%",
               }}
             >
-              <Sparkle size={9} color="#fff" />
+              <Sparkle size={10} color="#fff" />
               {claiming ? "Claiming…" : "Claim Stars"}
             </button>
 
@@ -443,15 +450,15 @@ export default function Home() {
               style={{
                 background: "#fff", color: "#111",
                 border: "1.5px solid #111", borderRadius: 100,
-                padding: "7px 16px", fontSize: 11, cursor: "pointer",
+                padding: "11px 20px", fontSize: 13, cursor: "pointer",
                 fontFamily: "system-ui", letterSpacing: 0.4, fontWeight: 500,
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                 width: "100%",
                 transition: "background 0.2s",
               }}
             >
-              <Sparkle size={9} color="#111" />
-              Claim More Stars
+              <Sparkle size={10} color="#111" />
+              Join Waitlist
             </button>
           </div>
 
@@ -464,13 +471,19 @@ export default function Home() {
           {/* Priority note */}
           <p style={{
             fontSize: 11, color: "#bbb", letterSpacing: 0.3,
-            marginBottom: 28, fontFamily: "system-ui",
+            marginBottom: 0, fontFamily: "system-ui",
             display: "flex", alignItems: "center", gap: 6,
           }}>
             <Sparkle size={8} color="#ccc" />
             The more stars you collect, the higher your priority.
             <Sparkle size={8} color="#ccc" />
           </p>
+
+        </div>{/* end hero-content */}
+        </div>{/* end hero-wrap inner */}
+
+        {/* ── STARS CARD + TASKS (below character, full width) ─────────────── */}
+        <div style={{ padding: "0 16px 32px", background: "#fff" }}>
 
           {/* ── STARS CARD ────────────────────────────────────────────────── */}
           <div style={{
@@ -480,6 +493,7 @@ export default function Home() {
             padding: "18px 24px",
             textAlign: "center",
             marginBottom: 12,
+            marginTop: 16,
             boxShadow: "0 1px 12px rgba(0,0,0,0.04)",
           }}>
             <div style={{ fontSize: 10, letterSpacing: 3, color: "#bbb", fontFamily: "system-ui", fontWeight: 600, marginBottom: 6 }}>
@@ -556,9 +570,8 @@ export default function Home() {
                   </span>
                 )}
             </div>
-          </div>
-
-        </div>
+          </div>{/* end task list card */}
+        </div>{/* end cards padding wrapper */}
       </section>
 
       {/* ── LIVE FEED ─────────────────────────────────────────────────────── */}
@@ -626,7 +639,7 @@ function SectionHead({ label }: { label: string }) {
       marginBottom: 10,
       display: "flex", alignItems: "center", gap: 6,
     }}>
-      <svg width="9" height="9" viewBox="0 0 24 24" fill={ASSETS.colors.gold">
+      <svg width="9" height="9" viewBox="0 0 24 24" fill={ASSETS.colors.gold}>
         <path d="M12 2 L13.2 10.8 L22 12 L13.2 13.2 L12 22 L10.8 13.2 L2 12 L10.8 10.8 Z" />
       </svg>
       {label}
