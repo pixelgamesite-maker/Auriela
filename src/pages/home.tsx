@@ -14,14 +14,15 @@ import { ASSETS } from "@/lib/assets";
 
 // ── Task definitions ───────────────────────────────────────────────────────────
 const SOCIAL_TASKS = [
-  { id: "follow_x",     label: "Follow on X",     stars: 10, href: "https://x.com/Aureliastudios_",       icon: "x"       },
-  { id: "join_discord", label: "Join Discord",     stars: 15, href: "https://discord.gg/vnDWxZCzy",        icon: "discord" },
-  { id: "share_social", label: "Share on Socials", stars: 20, href: "https://x.com/intent/tweet?text=Securing+my+spot+on+%40Aureliastudios_+%E2%9C%A6", icon: "share" },
+  { id: "follow_x",     label: "Follow on X",           stars: 10, href: "https://x.com/Aureliastudios_",       icon: "x"       },
+  { id: "join_discord", label: "Join Discord",          stars: 15, href: "https://discord.gg/vnDWxZCzy",        icon: "discord" },
+  { id: "join_telegram", label: "Join Telegram Channel", stars: 10, href: "https://t.me/aureliastudios",          icon: "telegram" },
 ];
 
 const INTERACTIVE_TASKS = [
-  { id: "read_lore",   label: "Read the Lore",   stars: 15, href: "/lore",    internal: true, icon: "book"  },
-  { id: "claim_more",  label: "Claim More Stars", stars: 10, href: "/social",  internal: true, icon: "stars" },
+  { id: "visit_website", label: "Visit Website",    stars: 10, href: "https://aurelia.studio", icon: "globe" },
+  { id: "read_lore",     label: "Read the Lore",    stars: 15, href: "/lore",    internal: true, icon: "book"  },
+  { id: "connect_wallet", label: "Connect Wallet",   stars: 20, href: "/connect", internal: true, icon: "wallet" },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -60,10 +61,15 @@ function TaskIcon({ name }: { name: string }) {
       <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.003.028.015.056.036.074a19.9 19.9 0 0 0 5.993 3.03.077.077 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
     </svg>
   );
-  if (name === "share") return (
+  if (name === "telegram") return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+    </svg>
+  );
+  if (name === "globe") return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
     </svg>
   );
   if (name === "book") return (
@@ -71,9 +77,11 @@ function TaskIcon({ name }: { name: string }) {
       <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
     </svg>
   );
-  if (name === "stars") return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" opacity="0.7">
-      <path d="M12 2 L13.2 10.8 L22 12 L13.2 13.2 L12 22 L10.8 13.2 L2 12 L10.8 10.8 Z" />
+  if (name === "wallet") return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
+      <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
+      <path d="M18 12a2 2 0 0 0 0 4h4v-4h-4z"/>
     </svg>
   );
   return null;
@@ -254,7 +262,6 @@ export default function Home() {
 
     if (href) {
       if (internal) {
-        // Navigate within app — complete task then go
         const { ok } = await completeTask(user.id, taskId, stars);
         if (ok) {
           setCompletedTasks([...completedTasks, taskId]);
@@ -308,12 +315,6 @@ export default function Home() {
             object-fit: contain;
             object-position: right center;
           }
-          .tasks-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr auto;
-          }
-          .tasks-col-divider { border-right: 1px solid ${ASSETS.colors.border}; }
-          .stars-card-mobile { display: none !important; }
         }
 
         @media (max-width: 768px) {
@@ -327,10 +328,7 @@ export default function Home() {
             object-position: right top;
             opacity: 0.88;
           }
-          .tasks-grid { display: flex; flex-direction: column; }
-          .tasks-col-divider { border-right: none; border-bottom: 1px solid ${ASSETS.colors.border}; }
-          .cta-row { flex-direction: column !important; }
-          .stars-col-grid { display: none !important; }
+          .cta-row { flex-direction: column; }
         }
       `}</style>
 
@@ -359,20 +357,15 @@ export default function Home() {
         ))}
 
         <div className="hero-content" style={{ position: "relative", zIndex: 3 }}>
-          <img
-            src={ASSETS.images.logo}
-            alt={ASSETS.brand.name}
-            style={{ height: 56, marginBottom: 8, display: "block", maxWidth: "80vw" }}
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-              const fb = document.getElementById("hero-brand-fallback");
-              if (fb) fb.style.display = "block";
-            }}
-          />
-          <div id="hero-brand-fallback" style={{
-            display: "none",
+          {/* Big serif AURELIA wordmark */}
+          <div style={{
             fontFamily: "'Playfair Display', serif",
-            fontSize: 32, letterSpacing: 6, fontWeight: 700, color: "#111", marginBottom: 4,
+            fontSize: "clamp(44px, 7vw, 72px)",
+            letterSpacing: 4,
+            fontWeight: 700,
+            color: "#111",
+            lineHeight: 1,
+            marginBottom: 4,
           }}>
             {ASSETS.brand.name}
           </div>
@@ -401,45 +394,46 @@ export default function Home() {
             marginBottom: 22, letterSpacing: 0.15, lineHeight: 1.55,
             maxWidth: 300,
           }}>
-            {ASSETS.brand.description}
+            Complete tasks and claim stars every 5 hours.
           </p>
 
+          {/* Stacked full-width CTAs */}
           <div
             className="cta-row"
-            style={{ display: "flex", flexDirection: "row", gap: 10, marginBottom: 10, maxWidth: 380 }}
+            style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 10, maxWidth: 380 }}
           >
             <button
               className="claim-btn"
               onClick={handleClaim}
               disabled={!canClaim}
               style={{
-                flex: 1,
+                width: "100%",
                 background: ASSETS.colors.ink, color: "#fff",
                 border: "none", borderRadius: 10,
-                padding: "13px 20px", fontSize: 13,
+                padding: "14px 20px", fontSize: 14,
                 cursor: !canClaim ? "not-allowed" : "pointer",
                 fontFamily: "system-ui", letterSpacing: 0.5, fontWeight: 500,
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                 opacity: !canClaim ? 0.45 : 1,
               }}
             >
-              <Sparkle size={11} color="#fff" />
+              <Sparkle size={12} color="#fff" />
               {claiming ? "Claiming…" : "Claim Stars"}
             </button>
 
             <button
               onClick={() => navigate("/social")}
               style={{
-                flex: 1,
-                background: ASSETS.colors.surface, color: ASSETS.colors.ink,
+                width: "100%",
+                background: "transparent", color: ASSETS.colors.ink,
                 border: `1.5px solid ${ASSETS.colors.ink}`, borderRadius: 10,
-                padding: "12px 20px", fontSize: 13, cursor: "pointer",
+                padding: "13px 20px", fontSize: 14, cursor: "pointer",
                 fontFamily: "system-ui", letterSpacing: 0.5, fontWeight: 500,
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                 transition: "background 0.2s",
               }}
             >
-              <Sparkle size={11} color={ASSETS.colors.ink} />
+              <Sparkle size={12} color={ASSETS.colors.ink} />
               Claim More Stars
             </button>
           </div>
@@ -457,10 +451,36 @@ export default function Home() {
             fontSize: 11, color: "#bbb", letterSpacing: 0.4,
             marginBottom: 28, fontFamily: "system-ui",
           }}>
-            ✦ {ASSETS.brand.priorityNote} ✦
+            ✦ The more stars you collect, the higher your priority. ✦
           </p>
 
-          {/* ── TASK CARDS ─────────────────────────────────────────────── */}
+          {/* ── STARS CARD (always visible, above tasks) ───────────────────── */}
+          <div style={{
+            background: ASSETS.colors.surface,
+            border: `1px solid ${ASSETS.colors.border}`,
+            borderRadius: 18,
+            padding: "20px 24px",
+            textAlign: "center",
+            marginBottom: 16,
+            boxShadow: "0 1px 16px rgba(0,0,0,0.03)",
+          }}>
+            <div style={{ fontSize: 10, letterSpacing: 3, color: "#bbb", fontFamily: "system-ui", fontWeight: 600, marginBottom: 6 }}>
+              YOUR STARS
+            </div>
+            <div style={{ height: 1, width: 28, background: ASSETS.colors.goldBorder, margin: "0 auto 10px" }} />
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+              <span style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: 44, fontWeight: 700, color: ASSETS.colors.ink,
+                lineHeight: 1, fontVariantNumeric: "tabular-nums",
+              }}>
+                {user.stars ?? 0}
+              </span>
+              <Sparkle size={16} color={ASSETS.colors.gold} />
+            </div>
+          </div>
+
+          {/* ── TASK LIST ─────────────────────────────────────────────────── */}
           <div style={{
             background: ASSETS.colors.surface,
             border: `1px solid ${ASSETS.colors.border}`,
@@ -468,78 +488,36 @@ export default function Home() {
             overflow: "hidden",
             boxShadow: "0 1px 16px rgba(0,0,0,0.03)",
           }}>
-            <div className="stars-card-mobile" style={{
-              padding: "16px 20px",
-              borderBottom: `1px solid ${ASSETS.colors.border}`,
-              textAlign: "center",
-            }}>
-              <div style={{ fontSize: 10, letterSpacing: 3, color: "#bbb", fontFamily: "system-ui", fontWeight: 600, marginBottom: 6 }}>
-                YOUR STARS
-              </div>
-              <div style={{ height: 1, width: 28, background: ASSETS.colors.goldBorder, margin: "0 auto 10px" }} />
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                <span style={{
-                  fontFamily: "'Playfair Display', serif",
-                  fontSize: 44, fontWeight: 700, color: ASSETS.colors.ink,
-                  lineHeight: 1, fontVariantNumeric: "tabular-nums",
-                }}>
-                  {user.stars ?? 0}
-                </span>
-                <Sparkle size={16} color={ASSETS.colors.gold} />
-              </div>
+            <div style={{ padding: "16px 20px 12px" }}>
+              <SectionHead label="SOCIAL TASKS" />
+              {SOCIAL_TASKS.map((t) => (
+                <TaskRow
+                  key={t.id} task={t}
+                  done={completedTasks.includes(t.id)}
+                  loading={taskLoading === t.id}
+                  onTask={handleTask}
+                />
+              ))}
             </div>
 
-            <div className="tasks-grid">
-              <div className="tasks-col-divider" style={{ padding: "16px 16px 12px" }}>
-                <SectionHead label="SOCIAL TASKS" />
-                {SOCIAL_TASKS.map((t) => (
-                  <TaskRow
-                    key={t.id} task={t}
-                    done={completedTasks.includes(t.id)}
-                    loading={taskLoading === t.id}
-                    onTask={handleTask}
-                  />
-                ))}
-              </div>
+            <div style={{ height: 1, background: ASSETS.colors.border, margin: "0 20px" }} />
 
-              <div className="tasks-col-divider" style={{ padding: "16px 16px 12px" }}>
-                <SectionHead label="INTERACTIVE TASKS" />
-                {INTERACTIVE_TASKS.map((t) => (
-                  <TaskRow
-                    key={t.id} task={t}
-                    done={completedTasks.includes(t.id)}
-                    loading={taskLoading === t.id}
-                    onTask={handleTask}
-                  />
-                ))}
-              </div>
-
-              <div className="stars-col-grid" style={{
-                padding: "16px 24px",
-                display: "flex", flexDirection: "column",
-                alignItems: "center", justifyContent: "center",
-                minWidth: 130,
-              }}>
-                <div style={{ fontSize: 10, letterSpacing: 3, color: "#bbb", fontFamily: "system-ui", fontWeight: 600, marginBottom: 8, textAlign: "center" }}>
-                  YOUR STARS
-                </div>
-                <div style={{ height: 1, width: 28, background: ASSETS.colors.goldBorder, marginBottom: 10 }} />
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{
-                    fontFamily: "'Playfair Display', serif",
-                    fontSize: 44, fontWeight: 700, color: ASSETS.colors.ink,
-                    lineHeight: 1, fontVariantNumeric: "tabular-nums",
-                  }}>
-                    {user.stars ?? 0}
-                  </span>
-                  <Sparkle size={16} color={ASSETS.colors.gold} />
-                </div>
-              </div>
+            <div style={{ padding: "16px 20px 12px" }}>
+              <SectionHead label="INTERACTIVE TASKS" />
+              {INTERACTIVE_TASKS.map((t) => (
+                <TaskRow
+                  key={t.id} task={t}
+                  done={completedTasks.includes(t.id)}
+                  loading={taskLoading === t.id}
+                  onTask={handleTask}
+                />
+              ))}
             </div>
 
+            {/* Footer countdown */}
             <div style={{
               borderTop: `1px solid ${ASSETS.colors.border}`,
-              padding: "11px 18px",
+              padding: "12px 18px",
               display: "flex", alignItems: "center", justifyContent: "center",
               gap: 8, fontSize: 12, color: "#999", fontFamily: "system-ui",
             }}>
@@ -551,7 +529,7 @@ export default function Home() {
                 ? <span style={{ color: ASSETS.colors.gold, fontWeight: 600 }}>Ready to claim!</span>
                 : (
                   <span>
-                    Next claim in{" "}
+                    Next claim available in{" "}
                     <strong style={{ color: ASSETS.colors.ink, letterSpacing: 0.5, fontWeight: 600 }}>
                       {fmt(countdown)}
                     </strong>
@@ -649,7 +627,7 @@ function TaskRow({
       onClick={() => !done && onTask(task.id, task.stars, task.href, task.internal)}
       style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "10px 6px",
+        padding: "12px 6px",
         borderBottom: "1px solid #f5f5f3",
       }}
     >
