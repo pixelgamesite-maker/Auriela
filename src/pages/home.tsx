@@ -14,15 +14,15 @@ import { ASSETS } from "@/lib/assets";
 
 // ── Task definitions ───────────────────────────────────────────────────────────
 const SOCIAL_TASKS = [
-  { id: "follow_x",     label: "Follow on X",           stars: 10, href: "https://x.com/Aureliastudios_",       icon: "x"       },
-  { id: "join_discord", label: "Join Discord",          stars: 15, href: "https://discord.gg/vnDWxZCzy",        icon: "discord" },
-  { id: "join_telegram", label: "Join Telegram Channel", stars: 10, href: "https://t.me/aureliastudios",          icon: "telegram" },
+  { id: "follow_x",      label: "Follow on X",           stars: 10, href: "https://x.com/Aureliastudios_",                                                   icon: "x"       },
+  { id: "join_discord",  label: "Join Discord",           stars: 15, href: "https://discord.gg/vnDWxZCzy",                                                    icon: "discord" },
+  { id: "join_telegram", label: "Join Telegram Channel",  stars: 10, href: "https://t.me/aureliastudios",                                                     icon: "telegram"},
 ];
 
 const INTERACTIVE_TASKS = [
-  { id: "visit_website", label: "Visit Website",    stars: 10, href: "https://aurelia.studio", icon: "globe" },
-  { id: "read_lore",     label: "Read the Lore",    stars: 15, href: "/lore",    internal: true, icon: "book"  },
-  { id: "connect_wallet", label: "Connect Wallet",   stars: 20, href: "/connect", internal: true, icon: "wallet" },
+  { id: "visit_website", label: "Visit Website",  stars: 10, href: "https://aurelia.studio",                                                                  icon: "globe"   },
+  { id: "read_lore",     label: "Read the Lore",  stars: 15, href: "/lore",   internal: true,                                                                 icon: "book"    },
+  { id: "claim_more",    label: "Claim More Stars", stars: 10, href: "/social", internal: true,                                                               icon: "stars"   },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -77,11 +77,9 @@ function TaskIcon({ name }: { name: string }) {
       <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
     </svg>
   );
-  if (name === "wallet") return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
-      <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
-      <path d="M18 12a2 2 0 0 0 0 4h4v-4h-4z"/>
+  if (name === "stars") return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" opacity="0.7">
+      <path d="M12 2 L13.2 10.8 L22 12 L13.2 13.2 L12 22 L10.8 13.2 L2 12 L10.8 10.8 Z" />
     </svg>
   );
   return null;
@@ -286,6 +284,8 @@ export default function Home() {
   return (
     <MainLayout>
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&display=swap');
+
         @keyframes fadeUp  { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
         @keyframes pulse   { 0%,100%{opacity:1} 50%{opacity:.35} }
         @keyframes twinkle { 0%,100%{opacity:.2} 50%{opacity:.6} }
@@ -297,7 +297,9 @@ export default function Home() {
         .claim-btn { transition: all 0.2s ease; }
         .claim-btn:hover:not(:disabled) { background: #222 !important; }
         .claim-btn:active:not(:disabled) { transform: scale(0.97); }
+        .outline-btn:hover { background: rgba(0,0,0,0.04) !important; }
 
+        /* ── Desktop ── */
         @media (min-width: 769px) {
           .hero-wrap {
             min-height: calc(100vh - 68px);
@@ -317,18 +319,18 @@ export default function Home() {
           }
         }
 
+        /* ── Mobile ── */
         @media (max-width: 768px) {
-          .hero-wrap { min-height: auto; display: block; }
-          .hero-content { width: 100%; padding: 24px 20px 40px; }
+          .hero-wrap { min-height: auto; display: block; position: relative; }
+          .hero-content { width: 100%; padding: 28px 24px 40px; }
           .hero-character {
             position: absolute;
-            right: -8px; top: -10px;
-            height: 46%; width: 58%;
+            right: -8px; top: 0;
+            height: 52%; width: 60%;
             object-fit: contain;
             object-position: right top;
-            opacity: 0.88;
+            opacity: 0.9;
           }
-          .cta-row { flex-direction: column; }
         }
       `}</style>
 
@@ -336,7 +338,7 @@ export default function Home() {
       <section className="hero-wrap" style={{
         position: "relative",
         overflow: "hidden",
-        background: ASSETS.colors.bg,
+        background: "#fff",
       }}>
         <img
           className="hero-character"
@@ -349,7 +351,7 @@ export default function Home() {
         {([[8,5],[14,55],[22,82],[68,8],[76,68],[88,30],[50,90],[38,5]] as [number,number][]).map(([t,l], i) => (
           <span key={i} style={{
             position: "absolute", top: `${t}%`, left: `${l}%`,
-            color: ASSETS.colors.gold, opacity: 0.25,
+            color: ASSETS.colors.gold, opacity: 0.2,
             fontSize: i % 2 === 0 ? 8 : 14, pointerEvents: "none",
             animation: `twinkle ${2.4 + i * 0.3}s ease-in-out infinite`,
             zIndex: 2,
@@ -357,138 +359,155 @@ export default function Home() {
         ))}
 
         <div className="hero-content" style={{ position: "relative", zIndex: 3 }}>
-          {/* Big serif AURELIA wordmark */}
-          <div style={{
+
+          {/* Logo image */}
+          <img
+            src={ASSETS.images.logo}
+            alt={ASSETS.brand.name}
+            style={{ height: 52, marginBottom: 6, display: "block", maxWidth: "70vw" }}
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+              const fb = document.getElementById("hero-brand-fallback");
+              if (fb) fb.style.display = "block";
+            }}
+          />
+          <div id="hero-brand-fallback" style={{
+            display: "none",
             fontFamily: "'Playfair Display', serif",
-            fontSize: "clamp(44px, 7vw, 72px)",
-            letterSpacing: 4,
-            fontWeight: 700,
-            color: "#111",
-            lineHeight: 1,
-            marginBottom: 4,
+            fontSize: "clamp(36px,6vw,56px)",
+            letterSpacing: 6, fontWeight: 700, color: "#111",
+            marginBottom: 6, lineHeight: 1,
           }}>
             {ASSETS.brand.name}
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 18 }}>
-            <div style={{ height: 1, width: 20, background: "#d8d7d2" }} />
-            <Sparkle size={6} color="#c0bfb8" />
-            <Sparkle size={8} color="#c0bfb8" />
-            <Sparkle size={6} color="#c0bfb8" />
-            <div style={{ height: 1, width: 20, background: "#d8d7d2" }} />
+          {/* Decorative rule */}
+          <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 20 }}>
+            <div style={{ height: 1, width: 16, background: "#ddd" }} />
+            <Sparkle size={5} color="#ccc" />
+            <Sparkle size={7} color="#ccc" />
+            <Sparkle size={5} color="#ccc" />
+            <div style={{ height: 1, width: 16, background: "#ddd" }} />
           </div>
 
+          {/* Heading — lighter weight, single line */}
           <h1 style={{
             fontFamily: "'Playfair Display', serif",
-            fontSize: "clamp(36px, 5vw, 58px)",
-            fontWeight: 700, lineHeight: 1.08,
-            color: ASSETS.colors.ink, margin: "0 0 10px",
-            letterSpacing: "-0.02em",
+            fontSize: "clamp(32px, 5vw, 52px)",
+            fontWeight: 400,
+            lineHeight: 1.1,
+            color: "#111",
+            margin: "0 0 10px",
+            letterSpacing: "-0.01em",
           }}>
-            Secure<br />Your Spot
+            Secure Your Spot
           </h1>
 
+          {/* Subtitle — centered, tight, 2 lines like mockup */}
           <p style={{
             fontFamily: "system-ui, -apple-system, sans-serif",
-            fontSize: 13, color: ASSETS.colors.muted,
-            marginBottom: 22, letterSpacing: 0.15, lineHeight: 1.55,
-            maxWidth: 300,
+            fontSize: 13,
+            color: "#888",
+            marginBottom: 24,
+            lineHeight: 1.6,
+            maxWidth: 220,
+            textAlign: "center",
           }}>
-            Complete tasks and claim stars every 5 hours.
+            Complete tasks and claim stars<br />every 5 hours.
           </p>
 
-          {/* Stacked full-width CTAs */}
-          <div
-            className="cta-row"
-            style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 10, maxWidth: 380 }}
-          >
+          {/* Buttons — short, pill-shaped, not full width */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 14, width: "100%", maxWidth: 280 }}>
             <button
               className="claim-btn"
               onClick={handleClaim}
               disabled={!canClaim}
               style={{
-                width: "100%",
-                background: ASSETS.colors.ink, color: "#fff",
-                border: "none", borderRadius: 10,
-                padding: "14px 20px", fontSize: 14,
+                background: "#111", color: "#fff",
+                border: "none", borderRadius: 100,
+                padding: "13px 24px", fontSize: 14,
                 cursor: !canClaim ? "not-allowed" : "pointer",
-                fontFamily: "system-ui", letterSpacing: 0.5, fontWeight: 500,
+                fontFamily: "system-ui", letterSpacing: 0.4, fontWeight: 500,
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                 opacity: !canClaim ? 0.45 : 1,
+                width: "100%",
               }}
             >
-              <Sparkle size={12} color="#fff" />
+              <Sparkle size={11} color="#fff" />
               {claiming ? "Claiming…" : "Claim Stars"}
             </button>
 
             <button
+              className="outline-btn"
               onClick={() => navigate("/social")}
               style={{
-                width: "100%",
-                background: "transparent", color: ASSETS.colors.ink,
-                border: `1.5px solid ${ASSETS.colors.ink}`, borderRadius: 10,
-                padding: "13px 20px", fontSize: 14, cursor: "pointer",
-                fontFamily: "system-ui", letterSpacing: 0.5, fontWeight: 500,
+                background: "#fff", color: "#111",
+                border: "1.5px solid #111", borderRadius: 100,
+                padding: "12px 24px", fontSize: 14, cursor: "pointer",
+                fontFamily: "system-ui", letterSpacing: 0.4, fontWeight: 500,
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                width: "100%",
                 transition: "background 0.2s",
               }}
             >
-              <Sparkle size={12} color={ASSETS.colors.ink} />
+              <Sparkle size={11} color="#111" />
               Claim More Stars
             </button>
           </div>
 
           {claimMsg && (
-            <p style={{
-              fontSize: 12, color: ASSETS.colors.gold, marginBottom: 6,
-              animation: "fadeUp 0.3s ease", fontFamily: "system-ui",
-            }}>
+            <p style={{ fontSize: 12, color: ASSETS.colors.gold, marginBottom: 8, animation: "fadeUp 0.3s ease", fontFamily: "system-ui" }}>
               {claimMsg}
             </p>
           )}
 
+          {/* Priority note */}
           <p style={{
-            fontSize: 11, color: "#bbb", letterSpacing: 0.4,
+            fontSize: 11, color: "#bbb", letterSpacing: 0.3,
             marginBottom: 28, fontFamily: "system-ui",
+            display: "flex", alignItems: "center", gap: 6,
           }}>
-            ✦ The more stars you collect, the higher your priority. ✦
+            <Sparkle size={8} color="#ccc" />
+            The more stars you collect, the higher your priority.
+            <Sparkle size={8} color="#ccc" />
           </p>
 
-          {/* ── STARS CARD (always visible, above tasks) ───────────────────── */}
+          {/* ── STARS CARD ────────────────────────────────────────────────── */}
           <div style={{
-            background: ASSETS.colors.surface,
+            background: "#fff",
             border: `1px solid ${ASSETS.colors.border}`,
-            borderRadius: 18,
-            padding: "20px 24px",
+            borderRadius: 16,
+            padding: "18px 24px",
             textAlign: "center",
-            marginBottom: 16,
-            boxShadow: "0 1px 16px rgba(0,0,0,0.03)",
+            marginBottom: 12,
+            boxShadow: "0 1px 12px rgba(0,0,0,0.04)",
           }}>
             <div style={{ fontSize: 10, letterSpacing: 3, color: "#bbb", fontFamily: "system-ui", fontWeight: 600, marginBottom: 6 }}>
               YOUR STARS
             </div>
-            <div style={{ height: 1, width: 28, background: ASSETS.colors.goldBorder, margin: "0 auto 10px" }} />
+            <div style={{ height: 1, width: 24, background: ASSETS.colors.goldBorder, margin: "0 auto 10px" }} />
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
               <span style={{
                 fontFamily: "'Playfair Display', serif",
-                fontSize: 44, fontWeight: 700, color: ASSETS.colors.ink,
+                fontSize: 48, fontWeight: 700, color: "#111",
                 lineHeight: 1, fontVariantNumeric: "tabular-nums",
               }}>
                 {user.stars ?? 0}
               </span>
-              <Sparkle size={16} color={ASSETS.colors.gold} />
+              <Sparkle size={18} color={ASSETS.colors.gold} />
             </div>
           </div>
 
           {/* ── TASK LIST ─────────────────────────────────────────────────── */}
           <div style={{
-            background: ASSETS.colors.surface,
+            background: "#fff",
             border: `1px solid ${ASSETS.colors.border}`,
-            borderRadius: 18,
+            borderRadius: 16,
             overflow: "hidden",
-            boxShadow: "0 1px 16px rgba(0,0,0,0.03)",
+            boxShadow: "0 1px 12px rgba(0,0,0,0.04)",
           }}>
-            <div style={{ padding: "16px 20px 12px" }}>
+            {/* Social tasks */}
+            <div style={{ padding: "16px 20px 4px" }}>
               <SectionHead label="SOCIAL TASKS" />
               {SOCIAL_TASKS.map((t) => (
                 <TaskRow
@@ -500,9 +519,10 @@ export default function Home() {
               ))}
             </div>
 
-            <div style={{ height: 1, background: ASSETS.colors.border, margin: "0 20px" }} />
+            <div style={{ height: 1, background: ASSETS.colors.border }} />
 
-            <div style={{ padding: "16px 20px 12px" }}>
+            {/* Interactive tasks */}
+            <div style={{ padding: "16px 20px 4px" }}>
               <SectionHead label="INTERACTIVE TASKS" />
               {INTERACTIVE_TASKS.map((t) => (
                 <TaskRow
@@ -514,7 +534,7 @@ export default function Home() {
               ))}
             </div>
 
-            {/* Footer countdown */}
+            {/* Countdown footer */}
             <div style={{
               borderTop: `1px solid ${ASSETS.colors.border}`,
               padding: "12px 18px",
@@ -530,13 +550,14 @@ export default function Home() {
                 : (
                   <span>
                     Next claim available in{" "}
-                    <strong style={{ color: ASSETS.colors.ink, letterSpacing: 0.5, fontWeight: 600 }}>
+                    <strong style={{ color: "#111", letterSpacing: 0.5, fontWeight: 700 }}>
                       {fmt(countdown)}
                     </strong>
                   </span>
                 )}
             </div>
           </div>
+
         </div>
       </section>
 
@@ -627,18 +648,18 @@ function TaskRow({
       onClick={() => !done && onTask(task.id, task.stars, task.href, task.internal)}
       style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "12px 6px",
+        padding: "13px 6px",
         borderBottom: "1px solid #f5f5f3",
       }}
     >
       <div style={{
-        display: "flex", alignItems: "center", gap: 10,
-        fontSize: 13, fontFamily: "system-ui", color: "#222", minWidth: 0,
+        display: "flex", alignItems: "center", gap: 12,
+        fontSize: 14, fontFamily: "system-ui", color: "#222", minWidth: 0,
       }}>
-        <span style={{ width: 20, height: 20, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "#555" }}>
+        <span style={{ width: 22, height: 22, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "#555" }}>
           <TaskIcon name={task.icon} />
         </span>
-        <span style={{ textDecoration: done ? "line-through" : "none", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        <span style={{ textDecoration: done ? "line-through" : "none", overflow: "hidden", textOverflow: "ellipsis" }}>
           {task.label}
         </span>
       </div>
