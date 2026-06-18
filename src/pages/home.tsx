@@ -313,7 +313,7 @@ export default function Home() {
           .hero-character {
             position: absolute;
             right: 0; top: 0;
-            height: 70%; width: 36%;
+            height: 100%; width: 52%;
             object-fit: contain;
             object-position: right center;
           }
@@ -326,7 +326,7 @@ export default function Home() {
           .hero-character {
             position: absolute;
             right: -8px; top: 0;
-            height: 36%; width: 42%;
+            height: 52%; width: 60%;
             object-fit: contain;
             object-position: right top;
             opacity: 0.9;
@@ -390,10 +390,10 @@ export default function Home() {
             <div style={{ height: 1, width: 16, background: "#ddd" }} />
           </div>
 
-          {/* Heading — scaled down ~30% */}
+          {/* Heading — scaled down further */}
           <h1 style={{
             fontFamily: "'Playfair Display', serif",
-            fontSize: "clamp(22px, 3.5vw, 36px)",
+            fontSize: "clamp(18px, 2.8vw, 28px)",
             fontWeight: 400,
             lineHeight: 1.1,
             color: "#111",
@@ -416,8 +416,8 @@ export default function Home() {
             Complete tasks and claim stars<br />every 5 hours.
           </p>
 
-          {/* Buttons — scaled down ~25% */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 14, width: "100%", maxWidth: 220 }}>
+          {/* Buttons — scaled down further */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 14, width: "100%", maxWidth: 200 }}>
             <button
               className="claim-btn"
               onClick={handleClaim}
@@ -425,7 +425,7 @@ export default function Home() {
               style={{
                 background: "#111", color: "#fff",
                 border: "none", borderRadius: 100,
-                padding: "10px 20px", fontSize: 12,
+                padding: "8px 16px", fontSize: 11,
                 cursor: !canClaim ? "not-allowed" : "pointer",
                 fontFamily: "system-ui", letterSpacing: 0.4, fontWeight: 500,
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
@@ -433,7 +433,7 @@ export default function Home() {
                 width: "100%",
               }}
             >
-              <Sparkle size={10} color="#fff" />
+              <Sparkle size={9} color="#fff" />
               {claiming ? "Claiming…" : "Claim Stars"}
             </button>
 
@@ -443,14 +443,14 @@ export default function Home() {
               style={{
                 background: "#fff", color: "#111",
                 border: "1.5px solid #111", borderRadius: 100,
-                padding: "9px 20px", fontSize: 12, cursor: "pointer",
+                padding: "7px 16px", fontSize: 11, cursor: "pointer",
                 fontFamily: "system-ui", letterSpacing: 0.4, fontWeight: 500,
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                 width: "100%",
                 transition: "background 0.2s",
               }}
             >
-              <Sparkle size={10} color="#111" />
+              <Sparkle size={9} color="#111" />
               Claim More Stars
             </button>
           </div>
@@ -626,7 +626,7 @@ function SectionHead({ label }: { label: string }) {
       marginBottom: 10,
       display: "flex", alignItems: "center", gap: 6,
     }}>
-      <svg width="9" height="9" viewBox="0 0 24 24" fill={ASSETS.colors.gold}>
+      <svg width="9" height="9" viewBox="0 0 24 24" fill={ASSETS.colors.gold">
         <path d="M12 2 L13.2 10.8 L22 12 L13.2 13.2 L12 22 L10.8 13.2 L2 12 L10.8 10.8 Z" />
       </svg>
       {label}
