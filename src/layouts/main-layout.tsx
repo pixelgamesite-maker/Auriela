@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { label: "About",       href: "/about" },
   { label: "Lore",        href: "/lore" },
   { label: "Tasks",       href: "/" },
+  { label: "Social",      href: "/social" },
   { label: "Leaderboard", href: "/leaderboard" },
 ];
 
@@ -129,7 +130,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
         </Link>
 
         {/* Desktop center links */}
-        <div className="desktop-links" style={{ display: "flex", gap: 36 }}>
+        <div className="desktop-links" style={{ display: "flex", gap: 32 }}>
           {NAV_LINKS.map(({ label, href }) => (
             <Link key={label} href={href}>
               <a className="nav-link" style={{
@@ -353,4 +354,3 @@ function AuthArea({
     </button>
   );
 }
-              
