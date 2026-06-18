@@ -24,42 +24,33 @@ const FEATURES = [
   },
 ];
 
-const DB_SETUP = `-- 1. Users table
-create table users (
-  id uuid primary key references auth.users,
-  x_handle text,
-  x_avatar text,
-  stars integer default 0,
-  last_claim timestamptz,
-  created_at timestamptz default now()
-);
-
--- 2. Star claims (live feed + history)
-create table star_claims (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references users,
-  x_handle text,
-  x_avatar text,
-  stars integer default 10,
-  claimed_at timestamptz default now()
-);
-
--- 3. Completed tasks
-create table tasks_completed (
-  user_id uuid references users,
-  task_id text,
-  completed_at timestamptz default now(),
-  primary key (user_id, task_id)
-);
-
--- 4. Enable Realtime on star_claims
--- Dashboard → Database → Replication → star_claims ✓`;
+const SCROLL_WORDS = [
+  "CONTROL", "✦", "ELEGANCE", "✦", "PRESENCE", "✦",
+  "DESIGN", "✦", "STILLNESS", "✦", "PRECISION", "✦",
+  "CONTROL", "✦", "ELEGANCE", "✦", "PRESENCE", "✦",
+  "DESIGN", "✦", "STILLNESS", "✦", "PRECISION", "✦",
+];
 
 export default function About() {
   return (
     <MainLayout>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+
+        @keyframes marquee {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+
+        .marquee-track {
+          display: flex;
+          width: max-content;
+          animation: marquee 22s linear infinite;
+        }
+
+        .marquee-track:hover {
+          animation-play-state: paused;
+        }
       `}</style>
 
       {/* Hero */}
@@ -79,6 +70,27 @@ export default function About() {
         </button>
       </div>
 
+      {/* Marquee ticker */}
+      <div style={{ overflow:"hidden", borderTop:"1px solid rgba(0,0,0,0.07)", borderBottom:"1px solid rgba(0,0,0,0.07)", padding:"16px 0", marginBottom:80, background:"#fafafa" }}>
+        <div className="marquee-track">
+          {SCROLL_WORDS.map((word, i) => (
+            <span
+              key={i}
+              style={{
+                fontFamily: word === "✦" ? "system-ui" : "'Playfair Display', serif",
+                fontSize: word === "✦" ? 10 : 13,
+                color: word === "✦" ? "#C9A84C" : "#111",
+                letterSpacing: word === "✦" ? 0 : 3,
+                marginRight: 28,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {word}
+            </span>
+          ))}
+        </div>
+      </div>
+
       {/* Feature grid */}
       <div style={{ padding:"0 clamp(24px,8vw,100px) 80px" }}>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(280px, 1fr))", gap:20, maxWidth:900 }}>
@@ -92,29 +104,47 @@ export default function About() {
         </div>
       </div>
 
-      {/* Supabase setup */}
-      <div style={{ padding:"0 clamp(24px,8vw,100px) 80px" }}>
-        <div style={{ maxWidth:760, background:"#0f0f0f", borderRadius:18, padding:36, overflow:"hidden" }}>
-          <div style={{ fontSize:10, letterSpacing:3, color:"#C9A84C", marginBottom:14, fontFamily:"system-ui" }}>DEVELOPER SETUP</div>
-          <h3 style={{ fontFamily:"'Playfair Display', serif", fontSize:24, color:"#fff", marginBottom:8 }}>Supabase + X Auth</h3>
-          <p style={{ fontSize:13, color:"rgba(255,255,255,0.45)", marginBottom:24, fontFamily:"system-ui", lineHeight:1.6 }}>
-            1. Create a project at <a href="https://supabase.com" target="_blank" style={{ color:"#C9A84C" }}>supabase.com</a><br/>
-            2. Go to Authentication → Providers → Twitter/X and add your X App credentials<br/>
-            3. Set redirect URL: <code style={{ color:"#C9A84C" }}>https://yourdomain.com/auth/callback</code><br/>
-            4. Add <code style={{ color:"#C9A84C" }}>VITE_SUPABASE_URL</code> and <code style={{ color:"#C9A84C" }}>VITE_SUPABASE_ANON_KEY</code> to your <code style={{ color:"#C9A84C" }}>.env</code><br/>
-            5. Run the SQL below in the Supabase SQL editor
-          </p>
-          <pre style={{
-            fontFamily:"'JetBrains Mono', 'Fira Code', monospace",
-            fontSize:12, lineHeight:1.75,
-            color:"rgba(255,255,255,0.65)",
-            overflowX:"auto", margin:0,
-            padding:0, background:"transparent",
-          }}>
-            {DB_SETUP}
-          </pre>
+      {/* Brand narrative + image */}
+      <div style={{ padding:"0 clamp(24px,8vw,100px) 100px" }}>
+        <div style={{ maxWidth:900, display:"grid", gridTemplateColumns:"1fr 1fr", gap:60, alignItems:"center" }}>
+
+          {/* Image */}
+          <div style={{ borderRadius:20, overflow:"hidden", aspectRatio:"4/5", background:"#f0ede8" }}>
+            <img
+              src="/aurelia-image.jpg"
+              alt="Aurelia"
+              style={{ width:"100%", height:"100%", objectFit:"cover", display:"block" }}
+            />
+          </div>
+
+          {/* Copy */}
+          <div>
+            <div style={{ fontSize:10, letterSpacing:4, color:"#C9A84C", marginBottom:20, fontFamily:"system-ui" }}>THE STORY</div>
+            <h2 style={{ fontFamily:"'Playfair Display', serif", fontSize:"clamp(28px,3vw,40px)", color:"#111", margin:"0 0 24px", lineHeight:1.15 }}>
+              Born in a lab.<br/>Shaped by signal.<br/>Defined by presence.
+            </h2>
+            <p style={{ fontSize:15, color:"#666", lineHeight:1.9, fontFamily:"system-ui", marginBottom:16 }}>
+              Aurelia began in a lab. What started as a controlled creation slowly became something more — not just synthetic bodies, but identities. Quiet, refined beings shaped through design, stillness, and precision.
+            </p>
+            <p style={{ fontSize:15, color:"#666", lineHeight:1.9, fontFamily:"system-ui", marginBottom:16 }}>
+              Each Aurelia carries its own presence. Calm faces. Clean forms. Subtle details. Nothing loud. Nothing wasted.
+            </p>
+            <p style={{ fontSize:15, color:"#888", lineHeight:1.9, fontFamily:"system-ui", fontStyle:"italic" }}>
+              This is a world built between human feeling and artificial design — where beauty is measured, identity is intentional, and silence says enough.
+            </p>
+            <div style={{ marginTop:32, display:"flex", gap:24 }}>
+              {["Control", "Elegance", "Presence"].map((word) => (
+                <div key={word} style={{ textAlign:"center" }}>
+                  <div style={{ fontSize:9, letterSpacing:3, color:"#C9A84C", fontFamily:"system-ui" }}>✦</div>
+                  <div style={{ fontSize:11, letterSpacing:2, color:"#999", fontFamily:"system-ui", marginTop:6 }}>{word.toUpperCase()}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
         </div>
       </div>
     </MainLayout>
   );
 }
+                
