@@ -313,7 +313,7 @@ export default function Home() {
           .hero-character {
             position: absolute;
             right: 0; top: 0;
-            height: 100%; width: 52%;
+            height: 70%; width: 36%;
             object-fit: contain;
             object-position: right center;
           }
@@ -326,7 +326,7 @@ export default function Home() {
           .hero-character {
             position: absolute;
             right: -8px; top: 0;
-            height: 52%; width: 60%;
+            height: 36%; width: 42%;
             object-fit: contain;
             object-position: right top;
             opacity: 0.9;
@@ -390,10 +390,10 @@ export default function Home() {
             <div style={{ height: 1, width: 16, background: "#ddd" }} />
           </div>
 
-          {/* Heading — lighter weight, single line */}
+          {/* Heading — scaled down ~30% */}
           <h1 style={{
             fontFamily: "'Playfair Display', serif",
-            fontSize: "clamp(32px, 5vw, 52px)",
+            fontSize: "clamp(22px, 3.5vw, 36px)",
             fontWeight: 400,
             lineHeight: 1.1,
             color: "#111",
@@ -403,7 +403,7 @@ export default function Home() {
             Secure Your Spot
           </h1>
 
-          {/* Subtitle — centered, tight, 2 lines like mockup */}
+          {/* Subtitle */}
           <p style={{
             fontFamily: "system-ui, -apple-system, sans-serif",
             fontSize: 13,
@@ -416,8 +416,8 @@ export default function Home() {
             Complete tasks and claim stars<br />every 5 hours.
           </p>
 
-          {/* Buttons — short, pill-shaped, not full width */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 14, width: "100%", maxWidth: 280 }}>
+          {/* Buttons — scaled down ~25% */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 14, width: "100%", maxWidth: 220 }}>
             <button
               className="claim-btn"
               onClick={handleClaim}
@@ -425,7 +425,7 @@ export default function Home() {
               style={{
                 background: "#111", color: "#fff",
                 border: "none", borderRadius: 100,
-                padding: "13px 24px", fontSize: 14,
+                padding: "10px 20px", fontSize: 12,
                 cursor: !canClaim ? "not-allowed" : "pointer",
                 fontFamily: "system-ui", letterSpacing: 0.4, fontWeight: 500,
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
@@ -433,7 +433,7 @@ export default function Home() {
                 width: "100%",
               }}
             >
-              <Sparkle size={11} color="#fff" />
+              <Sparkle size={10} color="#fff" />
               {claiming ? "Claiming…" : "Claim Stars"}
             </button>
 
@@ -443,14 +443,14 @@ export default function Home() {
               style={{
                 background: "#fff", color: "#111",
                 border: "1.5px solid #111", borderRadius: 100,
-                padding: "12px 24px", fontSize: 14, cursor: "pointer",
+                padding: "9px 20px", fontSize: 12, cursor: "pointer",
                 fontFamily: "system-ui", letterSpacing: 0.4, fontWeight: 500,
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                 width: "100%",
                 transition: "background 0.2s",
               }}
             >
-              <Sparkle size={11} color="#111" />
+              <Sparkle size={10} color="#111" />
               Claim More Stars
             </button>
           </div>
