@@ -322,7 +322,7 @@ export default function Home() {
         /* ── Mobile ── */
         @media (max-width: 768px) {
           .hero-wrap { min-height: auto; display: block; position: relative; overflow: visible; }
-          .hero-content { width: 100%; padding: 20px 22px 24px; }
+          .hero-content { width: 100%; padding: 20px 22px 16px; }
           .hero-character {
             position: absolute;
             right: 0; top: 0;
@@ -423,8 +423,8 @@ export default function Home() {
             Complete tasks and claim stars<br />every 5 hours.
           </p>
 
-          {/* Buttons — short, pill-shaped, not full width */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 14, width: "100%", maxWidth: 220 }}>
+          {/* Buttons — compact pill, left-aligned */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14, width: "100%", maxWidth: 170 }}>
             <button
               className="claim-btn"
               onClick={handleClaim}
@@ -432,15 +432,15 @@ export default function Home() {
               style={{
                 background: "#111", color: "#fff",
                 border: "none", borderRadius: 100,
-                padding: "12px 20px", fontSize: 13,
+                padding: "10px 16px", fontSize: 12,
                 cursor: !canClaim ? "not-allowed" : "pointer",
                 fontFamily: "system-ui", letterSpacing: 0.4, fontWeight: 500,
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
                 opacity: !canClaim ? 0.45 : 1,
                 width: "100%",
               }}
             >
-              <Sparkle size={10} color="#fff" />
+              <Sparkle size={9} color="#fff" />
               {claiming ? "Claiming…" : "Claim Stars"}
             </button>
 
@@ -450,15 +450,15 @@ export default function Home() {
               style={{
                 background: "#fff", color: "#111",
                 border: "1.5px solid #111", borderRadius: 100,
-                padding: "11px 20px", fontSize: 13, cursor: "pointer",
+                padding: "9px 16px", fontSize: 12, cursor: "pointer",
                 fontFamily: "system-ui", letterSpacing: 0.4, fontWeight: 500,
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
                 width: "100%",
                 transition: "background 0.2s",
               }}
             >
-              <Sparkle size={10} color="#111" />
-              Join Waitlist
+              <Sparkle size={9} color="#111" />
+              Claim More Stars
             </button>
           </div>
 
@@ -493,7 +493,7 @@ export default function Home() {
             padding: "18px 24px",
             textAlign: "center",
             marginBottom: 12,
-            marginTop: 16,
+            marginTop: 0,
             boxShadow: "0 1px 12px rgba(0,0,0,0.04)",
           }}>
             <div style={{ fontSize: 10, letterSpacing: 3, color: "#bbb", fontFamily: "system-ui", fontWeight: 600, marginBottom: 6 }}>
