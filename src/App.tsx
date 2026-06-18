@@ -6,6 +6,7 @@ import Home from "@/pages/home";
 import Leaderboard from "@/pages/leaderboard";
 import Lore from "@/pages/lore";
 import About from "@/pages/about";
+import Social from "@/pages/social";
 import AuthCallback from "@/pages/auth/auth-callback";
 import NotFound from "@/pages/not-found";
 
@@ -25,6 +26,7 @@ function Router() {
       <Route path="/leaderboard" component={Leaderboard} />
       <Route path="/lore" component={Lore} />
       <Route path="/about" component={About} />
+      <Route path="/social" component={Social} />
       <Route path="/auth/callback" component={AuthCallback} />
       <Route component={NotFound} />
     </Switch>
