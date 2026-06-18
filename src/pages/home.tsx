@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "wouter";
 import { MainLayout } from "@/layouts/main-layout";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -19,8 +20,8 @@ const SOCIAL_TASKS = [
 ];
 
 const INTERACTIVE_TASKS = [
-  { id: "read_lore",    label: "Read the Lore",        stars: 15, href: "/lore",       internal: true, icon: "book"   },
-  { id: "claim_more",  label: "Claim More Stars",      stars: 10, href: "/leaderboard", internal: true, icon: "stars"  },
+  { id: "read_lore",   label: "Read the Lore",   stars: 15, href: "/lore",    internal: true, icon: "book"  },
+  { id: "claim_more",  label: "Claim More Stars", stars: 10, href: "/social",  internal: true, icon: "stars" },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -118,7 +119,6 @@ function GatedLanding({ onSignIn }: { onSignIn: () => void }) {
       position: "relative",
       overflow: "hidden",
     }}>
-      {/* Subtle sparkles */}
       {([[12,8],[88,12],[6,80],[92,75],[50,5],[20,50],[78,45]] as [number,number][]).map(([t,l], i) => (
         <span key={i} style={{
           position: "absolute", top: `${t}%`, left: `${l}%`,
@@ -128,7 +128,6 @@ function GatedLanding({ onSignIn }: { onSignIn: () => void }) {
         }}>✦</span>
       ))}
 
-      {/* Content */}
       <div style={{
         position: "relative", zIndex: 2,
         display: "flex", flexDirection: "column",
@@ -198,6 +197,7 @@ function GatedLanding({ onSignIn }: { onSignIn: () => void }) {
 // ── Main page ──────────────────────────────────────────────────────────────────
 export default function Home() {
   const { user, loading, completedTasks, setCompletedTasks, refreshUser, signInWithTwitter } = useAuth();
+  const [, navigate] = useLocation();
 
   const [countdown,   setCountdown]   = useState(0);
   const [canClaim,    setCanClaim]    = useState(false);
@@ -229,7 +229,6 @@ export default function Home() {
 
   if (loading) return null;
 
-  // ── Gated: show landing if not signed in ──
   if (!user) {
     return (
       <div style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif" }}>
@@ -252,7 +251,23 @@ export default function Home() {
   const handleTask = async (taskId: string, stars: number, href: string | null, internal?: boolean) => {
     if (completedTasks.includes(taskId)) return;
     setTaskLoading(taskId);
-    if (href && !internal) window.open(href, "_blank");
+
+    if (href) {
+      if (internal) {
+        // Navigate within app — complete task then go
+        const { ok } = await completeTask(user.id, taskId, stars);
+        if (ok) {
+          setCompletedTasks([...completedTasks, taskId]);
+          await refreshUser();
+        }
+        setTaskLoading(null);
+        navigate(href);
+        return;
+      } else {
+        window.open(href, "_blank");
+      }
+    }
+
     const { ok } = await completeTask(user.id, taskId, stars);
     if (ok) {
       setCompletedTasks([...completedTasks, taskId]);
@@ -276,7 +291,6 @@ export default function Home() {
         .claim-btn:hover:not(:disabled) { background: #222 !important; }
         .claim-btn:active:not(:disabled) { transform: scale(0.97); }
 
-        /* ── Desktop ── */
         @media (min-width: 769px) {
           .hero-wrap {
             min-height: calc(100vh - 68px);
@@ -302,7 +316,6 @@ export default function Home() {
           .stars-card-mobile { display: none !important; }
         }
 
-        /* ── Mobile ── */
         @media (max-width: 768px) {
           .hero-wrap { min-height: auto; display: block; }
           .hero-content { width: 100%; padding: 24px 20px 40px; }
@@ -327,7 +340,6 @@ export default function Home() {
         overflow: "hidden",
         background: ASSETS.colors.bg,
       }}>
-        {/* Character */}
         <img
           className="hero-character"
           src={ASSETS.images.character}
@@ -336,7 +348,6 @@ export default function Home() {
           onError={(e) => { e.currentTarget.style.display = "none"; }}
         />
 
-        {/* Sparkles */}
         {([[8,5],[14,55],[22,82],[68,8],[76,68],[88,30],[50,90],[38,5]] as [number,number][]).map(([t,l], i) => (
           <span key={i} style={{
             position: "absolute", top: `${t}%`, left: `${l}%`,
@@ -347,9 +358,7 @@ export default function Home() {
           }}>✦</span>
         ))}
 
-        {/* Content */}
         <div className="hero-content" style={{ position: "relative", zIndex: 3 }}>
-          {/* Logo */}
           <img
             src={ASSETS.images.logo}
             alt={ASSETS.brand.name}
@@ -368,7 +377,6 @@ export default function Home() {
             {ASSETS.brand.name}
           </div>
 
-          {/* Decorative rule */}
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 18 }}>
             <div style={{ height: 1, width: 20, background: "#d8d7d2" }} />
             <Sparkle size={6} color="#c0bfb8" />
@@ -396,7 +404,6 @@ export default function Home() {
             {ASSETS.brand.description}
           </p>
 
-          {/* CTAs */}
           <div
             className="cta-row"
             style={{ display: "flex", flexDirection: "row", gap: 10, marginBottom: 10, maxWidth: 380 }}
@@ -421,7 +428,7 @@ export default function Home() {
             </button>
 
             <button
-              onClick={() => window.open("https://x.com/Aureliastudios_", "_blank")}
+              onClick={() => navigate("/social")}
               style={{
                 flex: 1,
                 background: ASSETS.colors.surface, color: ASSETS.colors.ink,
@@ -461,7 +468,6 @@ export default function Home() {
             overflow: "hidden",
             boxShadow: "0 1px 16px rgba(0,0,0,0.03)",
           }}>
-            {/* Your Stars — mobile only */}
             <div className="stars-card-mobile" style={{
               padding: "16px 20px",
               borderBottom: `1px solid ${ASSETS.colors.border}`,
@@ -484,7 +490,6 @@ export default function Home() {
             </div>
 
             <div className="tasks-grid">
-              {/* Social Tasks */}
               <div className="tasks-col-divider" style={{ padding: "16px 16px 12px" }}>
                 <SectionHead label="SOCIAL TASKS" />
                 {SOCIAL_TASKS.map((t) => (
@@ -497,7 +502,6 @@ export default function Home() {
                 ))}
               </div>
 
-              {/* Interactive Tasks */}
               <div className="tasks-col-divider" style={{ padding: "16px 16px 12px" }}>
                 <SectionHead label="INTERACTIVE TASKS" />
                 {INTERACTIVE_TASKS.map((t) => (
@@ -510,7 +514,6 @@ export default function Home() {
                 ))}
               </div>
 
-              {/* Your Stars — desktop only */}
               <div className="stars-col-grid" style={{
                 padding: "16px 24px",
                 display: "flex", flexDirection: "column",
@@ -534,7 +537,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Countdown footer */}
             <div style={{
               borderTop: `1px solid ${ASSETS.colors.border}`,
               padding: "11px 18px",
