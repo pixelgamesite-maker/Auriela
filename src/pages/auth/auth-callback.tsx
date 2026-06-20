@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { supabase } from "@/lib/supabase";
+import { supabase, applyReferral } from "@/lib/supabase";
 
-async function upsertUser(session: { user: any }) {
+const REFERRAL_STORAGE_KEY = "aurelia_ref";
+
+async function upsertUser(session: { user: any }): Promise<{ ok: boolean; isNewUser: boolean }> {
   const u    = session.user;
   const meta = u.user_metadata || {};
 
@@ -12,8 +14,17 @@ async function upsertUser(session: { user: any }) {
 
   if (!x_handle) {
     console.error("No Twitter handle found in metadata", meta);
-    return false;
+    return { ok: false, isNewUser: false };
   }
+
+  // Check whether this user already exists *before* upserting, so we know
+  // whether to apply a pending referral once the upsert below succeeds.
+  const { data: existing } = await supabase
+    .from("users")
+    .select("id")
+    .eq("id", u.id)
+    .maybeSingle();
+  const isNewUser = !existing;
 
   const { error } = await supabase.from("users").upsert(
     {
@@ -28,10 +39,10 @@ async function upsertUser(session: { user: any }) {
 
   if (error) {
     console.error("User upsert failed:", error.message);
-    return false;
+    return { ok: false, isNewUser: false };
   }
 
-  return true;
+  return { ok: true, isNewUser };
 }
 
 export default function AuthCallback() {
@@ -45,10 +56,18 @@ export default function AuthCallback() {
       if (handled || !session) return;
       handled = true;
 
-      const ok = await upsertUser(session);
+      const { ok, isNewUser } = await upsertUser(session);
       if (!ok) {
         setFailed(true);
         return;
+      }
+
+      if (isNewUser) {
+        const refCode = localStorage.getItem(REFERRAL_STORAGE_KEY);
+        if (refCode) {
+          await applyReferral(session.user.id, refCode);
+          localStorage.removeItem(REFERRAL_STORAGE_KEY);
+        }
       }
 
       navigate("/");
