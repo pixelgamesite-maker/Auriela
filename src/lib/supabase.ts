@@ -29,6 +29,13 @@ export type CompletedTask = {
   completed_at: string;
 };
 
+export type Referral = {
+  id: string;
+  referrer_id: string;
+  referred_id: string;
+  created_at: string;
+};
+
 // ── Auth helpers ──────────────────────────────────────────────────────────────
 
 export async function signInWithX() {
@@ -152,6 +159,45 @@ export async function getLeaderboard(): Promise<User[]> {
   return data ?? [];
 }
 
+// ── Referrals ─────────────────────────────────────────────────────────────────
+
+export const REFERRAL_STARS = 20;
+
+export async function getUserByHandle(handle: string): Promise<User | null> {
+  const normalized = handle.startsWith("@") ? handle : `@${handle}`;
+  const { data } = await supabase
+    .from("users")
+    .select("*")
+    .eq("x_handle", normalized)
+    .maybeSingle();
+  return data;
+}
+
+export async function getReferralCount(userId: string): Promise<number> {
+  const { count } = await supabase
+    .from("referrals")
+    .select("*", { count: "exact", head: true })
+    .eq("referrer_id", userId);
+  return count ?? 0;
+}
+
+/**
+ * Credits a referrer with REFERRAL_STARS the first time the person they
+ * referred signs up. The actual insert + star update happens inside the
+ * apply_referral() Postgres function (SECURITY DEFINER), because crediting
+ * another user's row can't be done safely from the client under RLS.
+ * Safe to call more than once for the same new user — the unique
+ * constraint on referred_id means only the first call can ever take effect.
+ */
+export async function applyReferral(newUserId: string, refCode: string): Promise<void> {
+  if (!refCode) return;
+  const { error } = await supabase.rpc("apply_referral", {
+    p_new_user_id: newUserId,
+    p_ref_code: refCode,
+  });
+  if (error) console.error("applyReferral failed:", error.message);
+}
+
 // ── Live feed ─────────────────────────────────────────────────────────────────
 
 export async function getRecentClaims(): Promise<StarClaim[]> {
@@ -173,4 +219,4 @@ export function subscribeToLiveFeed(callback: (claim: StarClaim) => void) {
     )
     .subscribe();
 }
-  
+
