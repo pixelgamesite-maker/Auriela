@@ -86,58 +86,36 @@ export async function getUser(id: string): Promise<User | null> {
 // ── Stars helpers ─────────────────────────────────────────────────────────────
 
 export const CLAIM_STARS = 10;
-export const CLAIM_INTERVAL_MS = 2 * 60 * 60 * 1000; // 2 hours
+export const CLAIM_INTERVAL_MS = 2 * 60 * 60 * 1000; // 2 hours — for UI countdown display only; the real cooldown is enforced inside claim_stars()
 
 export async function claimStars(userId: string): Promise<{ ok: boolean; message: string }> {
-  const user = await getUser(userId);
-  if (!user) return { ok: false, message: "User not found" };
-
-  const lastClaim = user.last_claim ? new Date(user.last_claim).getTime() : 0;
-  const now = Date.now();
-  if (now - lastClaim < CLAIM_INTERVAL_MS) {
-    const remaining = CLAIM_INTERVAL_MS - (now - lastClaim);
-    const h = Math.floor(remaining / 3600000);
-    const m = Math.floor((remaining % 3600000) / 60000);
-    return { ok: false, message: `Next claim available in ${h}h ${m}m` };
+  const { data, error } = await supabase.rpc("claim_stars", { p_user_id: userId });
+  if (error) {
+    console.error("claimStars failed:", error.message);
+    return { ok: false, message: "Failed to claim stars" };
   }
-
-  const { error: claimErr } = await supabase.from("star_claims").insert({
-    user_id: userId,
-    stars: CLAIM_STARS,
-    x_handle: user.x_handle,
-    x_avatar: user.x_avatar,
-    claimed_at: new Date().toISOString(),
-  });
-  if (claimErr) return { ok: false, message: "Failed to record claim" };
-
-  const { error: updateErr } = await supabase
-    .from("users")
-    .update({ stars: user.stars + CLAIM_STARS, last_claim: new Date().toISOString() })
-    .eq("id", userId);
-  if (updateErr) return { ok: false, message: "Failed to update stars" };
-
-  return { ok: true, message: `+${CLAIM_STARS} stars claimed!` };
+  const row = Array.isArray(data) ? data[0] : data;
+  return { ok: row?.ok ?? false, message: row?.message ?? "" };
 }
 
 export async function completeTask(
   userId: string,
   taskId: string,
-  taskStars: number
+  // Kept for compatibility with existing call sites — the star amount is
+  // no longer trusted from the client. It's validated against a hardcoded
+  // whitelist inside complete_task() instead, so this argument is ignored.
+  _taskStars: number
 ): Promise<{ ok: boolean }> {
-  const { error: insertErr } = await supabase
-    .from("tasks_completed")
-    .insert({ user_id: userId, task_id: taskId });
-  if (insertErr) return { ok: false };
-
-  const user = await getUser(userId);
-  if (!user) return { ok: false };
-
-  await supabase
-    .from("users")
-    .update({ stars: user.stars + taskStars })
-    .eq("id", userId);
-
-  return { ok: true };
+  const { data, error } = await supabase.rpc("complete_task", {
+    p_user_id: userId,
+    p_task_id: taskId,
+  });
+  if (error) {
+    console.error("completeTask failed:", error.message);
+    return { ok: false };
+  }
+  const row = Array.isArray(data) ? data[0] : data;
+  return { ok: row?.ok ?? false };
 }
 
 export async function getCompletedTasks(userId: string): Promise<string[]> {
@@ -219,4 +197,4 @@ export function subscribeToLiveFeed(callback: (claim: StarClaim) => void) {
     )
     .subscribe();
 }
-
+  
