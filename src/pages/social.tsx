@@ -6,7 +6,7 @@ import { ASSETS } from "@/lib/assets";
 
 // ── Task definitions ───────────────────────────────────────────────────────────
 // The tweet URL to engage with
-const TWEET_URL = "https://x.com/i/status/2066204218285822069";
+const TWEET_URL = "https://x.com/i/status/2068350731124342966";
 
 const SOCIAL_BOOST_TASKS = [
   {
@@ -25,7 +25,7 @@ const SOCIAL_BOOST_TASKS = [
     icon: "comment",
     action: "comment",
     cta: "Comment on X",
-    href: `https://x.com/intent/tweet?in_reply_to=2066204218285822069`,
+    href: `https://x.com/i/status/2068350731124342966`,
   },
   {
     id: "social_quote",
@@ -34,7 +34,7 @@ const SOCIAL_BOOST_TASKS = [
     icon: "quote",
     action: "quote",
     cta: "Quote Tweet",
-    href: `https://x.com/intent/retweet?tweet_id=2066204218285822069`,
+    href: `https://x.com/i/status/2068350731124342966`,
   },
 ];
 
