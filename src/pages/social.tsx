@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MainLayout } from "@/layouts/main-layout";
 import { useAuth } from "@/hooks/useAuth";
 import { completeTask } from "@/lib/supabase";
@@ -7,14 +7,24 @@ import { ASSETS } from "@/lib/assets";
 // ── Task definitions ───────────────────────────────────────────────────────────
 // The tweet URL to engage with
 const TWEET_URL = "https://x.com/i/status/2068350731124342966";
+const PROFILE_URL = "https://x.com/aureliastudios_";
+
+const COUNTDOWN_SECONDS = 15;
 
 const SOCIAL_BOOST_TASKS = [
+  {
+    id: "social_follow",
+    label: "Follow on X",
+    stars: 50,
+    icon: "follow",
+    cta: "Follow on X",
+    href: PROFILE_URL,
+  },
   {
     id: "social_like",
     label: "Like the post",
     stars: 25,
     icon: "heart",
-    action: "like",
     cta: "Like on X",
     href: TWEET_URL,
   },
@@ -23,18 +33,16 @@ const SOCIAL_BOOST_TASKS = [
     label: "Comment on the post",
     stars: 25,
     icon: "comment",
-    action: "comment",
     cta: "Comment on X",
-    href: `https://x.com/i/status/2068350731124342966`,
+    href: TWEET_URL,
   },
   {
     id: "social_quote",
     label: "Quote tweet",
     stars: 25,
     icon: "quote",
-    action: "quote",
     cta: "Quote Tweet",
-    href: `https://x.com/i/status/2068350731124342966`,
+    href: TWEET_URL,
   },
 ];
 
@@ -48,6 +56,11 @@ function Sparkle({ size = 14, color = ASSETS.colors.gold }: { size?: number; col
 }
 
 function TaskIcon({ name }: { name: string }) {
+  if (name === "follow") return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6"/><path d="M23 11h-6"/>
+    </svg>
+  );
   if (name === "heart") return (
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
@@ -75,35 +88,84 @@ function CheckIcon() {
   );
 }
 
+function XIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.63L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z" />
+    </svg>
+  );
+}
+
+// ── Per-task state machine ───────────────────────────────────────────────────
+// idle      → button shows the normal CTA, clickable
+// counting  → button shows a locked countdown, not clickable
+// done      → server confirmed completion (from completedTasks, or just now)
+type TaskPhase = "idle" | "counting" | "done";
+
 // ── Main page ──────────────────────────────────────────────────────────────────
 export default function Social() {
   const { user, completedTasks, setCompletedTasks, refreshUser } = useAuth();
-  const [taskLoading, setTaskLoading] = useState<string | null>(null);
-  const [toastMsg,    setToastMsg]    = useState("");
+  const [toastMsg, setToastMsg] = useState("");
 
-  const handleTask = async (taskId: string, stars: number, href: string) => {
+  // Tracks countdown seconds remaining per task id, only while phase === "counting"
+  const [secondsLeft, setSecondsLeft] = useState<Record<string, number>>({});
+  const timers = useRef<Record<string, ReturnType<typeof setInterval>>>({});
+
+  // Clean up any running intervals on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(timers.current).forEach(clearInterval);
+    };
+  }, []);
+
+  const getPhase = (taskId: string): TaskPhase => {
+    if (completedTasks.includes(taskId)) return "done";
+    if (secondsLeft[taskId] !== undefined) return "counting";
+    return "idle";
+  };
+
+  const handleTask = (task: (typeof SOCIAL_BOOST_TASKS)[number]) => {
     if (!user) return;
-    if (completedTasks.includes(taskId)) return;
+    const phase = getPhase(task.id);
+    if (phase !== "idle") return; // locked while counting, no-op once done
 
-    // Open X in new tab first so it feels immediate
-    window.open(href, "_blank");
+    // Open X immediately so it feels responsive
+    window.open(task.href, "_blank");
 
-    setTaskLoading(taskId);
-    const { ok } = await completeTask(user.id, taskId, stars);
-    if (ok) {
+    // Start the visual countdown
+    setSecondsLeft((prev) => ({ ...prev, [task.id]: COUNTDOWN_SECONDS }));
+    timers.current[task.id] = setInterval(() => {
+      setSecondsLeft((prev) => {
+        const remaining = (prev[task.id] ?? 0) - 1;
+        if (remaining <= 0) {
+          clearInterval(timers.current[task.id]);
+          delete timers.current[task.id];
+          // Fire the actual completion once the countdown finishes.
+          // Star math + the "only once" guarantee both live server-side
+          // in complete_task(), so this call is what actually counts —
+          // the countdown above is purely a UX delay, not a security gate.
+          finalizeTask(task.id, task.stars);
+          const { [task.id]: _omit, ...rest } = prev;
+          return rest;
+        }
+        return { ...prev, [task.id]: remaining };
+      });
+    }, 1000);
+  };
+
+  const finalizeTask = async (taskId: string, stars: number) => {
+    const result = await completeTask(user!.id, taskId, stars);
+    if (result.ok) {
       setCompletedTasks([...completedTasks, taskId]);
       await refreshUser();
       setToastMsg(`+${stars} stars earned ✦`);
       setTimeout(() => setToastMsg(""), 3000);
     }
-    setTaskLoading(null);
+    // If result.ok is false (e.g. already completed in another tab,
+    // or a stale session), we simply don't mark it done client-side —
+    // completedTasks will catch up to the true server state on next
+    // refreshUser()/page load.
   };
-
-  const totalEarnable = SOCIAL_BOOST_TASKS.reduce((sum, t) => sum + t.stars, 0);
-  const totalEarned   = SOCIAL_BOOST_TASKS
-    .filter((t) => completedTasks.includes(t.id))
-    .reduce((sum, t) => sum + t.stars, 0);
-  const allDone = totalEarned === totalEarnable;
 
   return (
     <MainLayout>
@@ -112,28 +174,24 @@ export default function Social() {
 
         @keyframes fadeUp  { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
         @keyframes pulse   { 0%,100%{opacity:1} 50%{opacity:.4} }
-        @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
 
-        .boost-card {
+        .boost-row {
           background: #fff;
           border: 1px solid rgba(0,0,0,0.07);
-          border-radius: 16px;
-          padding: 22px 24px;
+          border-radius: 14px;
+          padding: 16px 20px;
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 16px;
           transition: box-shadow 0.2s, border-color 0.2s;
-          cursor: pointer;
         }
-        .boost-card:hover:not(.done) {
+        .boost-row:hover:not(.done) {
           box-shadow: 0 4px 24px rgba(0,0,0,0.07);
           border-color: rgba(201,168,76,0.3);
         }
-        .boost-card.done {
-          opacity: 0.55;
-          cursor: default;
-        }
+        .boost-row.done { opacity: 0.55; }
+
         .boost-btn {
           background: #111;
           color: #fff;
@@ -150,9 +208,21 @@ export default function Social() {
           white-space: nowrap;
           flex-shrink: 0;
           transition: background 0.15s;
+          min-width: 128px;
+          justify-content: center;
         }
-        .boost-btn:hover { background: #333; }
-        .boost-btn:disabled { opacity: 0.5; cursor: default; }
+        .boost-btn:hover:not(:disabled) { background: #333; }
+        .boost-btn:disabled {
+          cursor: default;
+        }
+        .boost-btn.counting {
+          background: #e8e8e6;
+          color: #999;
+        }
+        .boost-btn.done-btn {
+          background: #ececea;
+          color: #aaa;
+        }
 
         .toast {
           position: fixed;
@@ -169,15 +239,6 @@ export default function Social() {
           animation: fadeUp 0.3s ease;
           z-index: 999;
           pointer-events: none;
-        }
-
-        .progress-bar-fill {
-          background: linear-gradient(90deg, #C9A84C, #e8c96a, #C9A84C);
-          background-size: 200% 100%;
-          animation: shimmer 2s linear infinite;
-          border-radius: 100px;
-          height: 100%;
-          transition: width 0.6s ease;
         }
       `}</style>
 
@@ -196,57 +257,22 @@ export default function Social() {
             Boost your place.
           </h1>
           <p style={{ fontSize: 15, color: "#777", lineHeight: 1.8, fontFamily: "system-ui", maxWidth: 480 }}>
-            Engage with the latest Aurelia post on X. Each action earns you stars and moves you up the priority list — permanently.
+            Engage with Aurelia on X. Each action earns you stars and moves you up the priority list — permanently.
           </p>
         </div>
 
-        {/* Progress summary */}
-        <div style={{
-          background: "#fafaf8",
-          border: "1px solid rgba(0,0,0,0.07)",
-          borderRadius: 16,
-          padding: "20px 24px",
-          marginBottom: 32,
-        }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-            <div style={{ fontFamily: "system-ui", fontSize: 12, color: "#999", letterSpacing: 0.5 }}>
-              PROGRESS
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: "#111" }}>
-                {totalEarned}
-              </span>
-              <span style={{ fontSize: 12, color: "#bbb", fontFamily: "system-ui" }}>/ {totalEarnable} stars</span>
-              <Sparkle size={12} />
-            </div>
-          </div>
-          <div style={{ height: 5, background: "#ebebeb", borderRadius: 100, overflow: "hidden" }}>
-            <div
-              className="progress-bar-fill"
-              style={{ width: `${(totalEarned / totalEarnable) * 100}%` }}
-            />
-          </div>
-          {allDone && (
-            <p style={{ marginTop: 12, fontSize: 12, color: ASSETS.colors.gold, fontFamily: "system-ui", animation: "fadeUp 0.4s ease" }}>
-              ✦ All tasks complete — you've earned {totalEarnable} bonus stars!
-            </p>
-          )}
-        </div>
-
-        {/* Task cards */}
+        {/* Task rows */}
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {SOCIAL_BOOST_TASKS.map((task) => {
-            const done    = completedTasks.includes(task.id);
-            const loading = taskLoading === task.id;
+            const phase = getPhase(task.id);
+            const done = phase === "done";
+            const counting = phase === "counting";
+            const remaining = secondsLeft[task.id];
 
             return (
-              <div
-                key={task.id}
-                className={`boost-card${done ? " done" : ""}`}
-                onClick={() => !done && !loading && handleTask(task.id, task.stars, task.href)}
-              >
+              <div key={task.id} className={`boost-row${done ? " done" : ""}`}>
                 {/* Left: icon + text */}
-                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 14, minWidth: 0 }}>
                   <div style={{
                     width: 42, height: 42, borderRadius: 12,
                     background: done ? ASSETS.colors.goldLight : "#f5f5f3",
@@ -257,11 +283,12 @@ export default function Social() {
                   }}>
                     {done ? <CheckIcon /> : <TaskIcon name={task.icon} />}
                   </div>
-                  <div>
+                  <div style={{ minWidth: 0 }}>
                     <div style={{
                       fontSize: 14, fontWeight: 600, color: "#111",
                       fontFamily: "system-ui", marginBottom: 3,
                       textDecoration: done ? "line-through" : "none",
+                      whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                     }}>
                       {task.label}
                     </div>
@@ -274,28 +301,24 @@ export default function Social() {
                   </div>
                 </div>
 
-                {/* Right: CTA */}
-                {!done && (
-                  <button
-                    className="boost-btn"
-                    disabled={!!loading}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleTask(task.id, task.stars, task.href);
-                    }}
-                  >
-                    {loading
-                      ? <span style={{ animation: "pulse 1s infinite" }}>…</span>
-                      : (
-                        <>
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.63L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z" />
-                          </svg>
-                          {task.cta}
-                        </>
-                      )}
-                  </button>
-                )}
+                {/* Right: CTA / countdown / done */}
+                <button
+                  className={`boost-btn${counting ? " counting" : ""}${done ? " done-btn" : ""}`}
+                  disabled={counting || done}
+                  onClick={() => handleTask(task)}
+                >
+                  {done ? (
+                    <>
+                      <CheckIcon /> Done
+                    </>
+                  ) : counting ? (
+                    <>{remaining}s…</>
+                  ) : (
+                    <>
+                      <XIcon /> {task.cta}
+                    </>
+                  )}
+                </button>
               </div>
             );
           })}
