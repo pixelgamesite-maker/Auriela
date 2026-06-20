@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { supabase, applyReferral } from "@/lib/supabase";
+import { useAuth } from "@/hooks/useAuth";
 
 const REFERRAL_STORAGE_KEY = "aurelia_ref";
 
@@ -48,6 +49,7 @@ async function upsertUser(session: { user: any }): Promise<{ ok: boolean; isNewU
 export default function AuthCallback() {
   const [, navigate]       = useLocation();
   const [failed, setFailed] = useState(false);
+  const { refreshUser }     = useAuth();
 
   useEffect(() => {
     let handled = false;
@@ -69,6 +71,13 @@ export default function AuthCallback() {
           localStorage.removeItem(REFERRAL_STORAGE_KEY);
         }
       }
+
+      // The row we just upserted may not have been visible yet to
+      // useAuth's own onAuthStateChange listener (it can fire and read
+      // before this upsert finishes writing). Force a fresh read now that
+      // the row definitely exists, so Home doesn't render the signed-out
+      // gate for a beat — or, on a slow connection, get stuck on it.
+      await refreshUser();
 
       navigate("/");
     };
@@ -96,6 +105,9 @@ export default function AuthCallback() {
       clearTimeout(timeout);
       subscription.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refreshUser
+    // isn't memoized in AuthProvider, so including it here would re-run
+    // this effect (and re-process the same sign-in) every time it changes.
   }, [navigate]);
 
   if (failed) {
