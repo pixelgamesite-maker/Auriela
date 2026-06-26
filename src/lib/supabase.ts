@@ -36,6 +36,23 @@ export type Referral = {
   created_at: string;
 };
 
+export type WhitelistEntry = {
+  id: string;
+  user_id: string | null;
+  x_username: string;
+  x_handle: string | null;
+  wallet: string;
+  quote_link: string | null;
+  comment_link: string | null;
+  follow_done: boolean;
+  like_quote_done: boolean;
+  comment_done: boolean;
+  status: "PENDING" | "APPROVED" | "GTD";
+  stars_at_apply: number;
+  created_at: string;
+  updated_at: string;
+};
+
 // ── Auth helpers ──────────────────────────────────────────────────────────────
 
 export async function signInWithX() {
@@ -197,4 +214,60 @@ export function subscribeToLiveFeed(callback: (claim: StarClaim) => void) {
     )
     .subscribe();
 }
-  
+
+// ── Whitelist helpers ─────────────────────────────────────────────────────────
+
+export async function applyWhitelist(data: {
+  x_username: string;
+  wallet: string;
+  quote_link?: string;
+  comment_link?: string;
+  follow_done?: boolean;
+  like_quote_done?: boolean;
+  comment_done?: boolean;
+  stars_at_apply?: number;
+}): Promise<{ ok: boolean; data?: WhitelistEntry }> {
+  const { data: result, error } = await supabase
+    .from("aurelia_whitelist")
+    .insert({
+      x_username: data.x_username.replace(/^@/, ""),
+      wallet: data.wallet.trim().toLowerCase(),
+      quote_link: data.quote_link?.trim() || null,
+      comment_link: data.comment_link?.trim() || null,
+      follow_done: data.follow_done ?? false,
+      like_quote_done: data.like_quote_done ?? false,
+      comment_done: data.comment_done ?? false,
+      stars_at_apply: data.stars_at_apply ?? 0,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("applyWhitelist failed:", error.message);
+    throw error;
+  }
+  return { ok: true, data: result };
+}
+
+export async function getWhitelistStatus(xHandle: string): Promise<Pick<WhitelistEntry, "status" | "created_at" | "stars_at_apply"> | null> {
+  const { data, error } = await supabase
+    .from("aurelia_whitelist")
+    .select("status,created_at,stars_at_apply")
+    .eq("x_username", xHandle.replace(/^@/, ""))
+    .maybeSingle();
+
+  if (error) {
+    console.error("getWhitelistStatus failed:", error.message);
+    throw error;
+  }
+  return data;
+}
+
+export async function linkWhitelistToUser(xHandle: string, userId: string): Promise<void> {
+  const { error } = await supabase
+    .from("aurelia_whitelist")
+    .update({ user_id: userId })
+    .eq("x_username", xHandle.replace(/^@/, ""));
+
+  if (error) console.error("linkWhitelistToUser failed:", error.message);
+}
