@@ -333,11 +333,11 @@ function WhitelistModal({ onClose, prefillHandle = "" }: { onClose: () => void; 
           </TaskCard>
         )}
 
-        {/* Step 4 */}
+        {/* Step 4 — FIXED: input field always visible, button only when not done */}
         {step4 && (
           <TaskCard delay={60}>
             <TaskHeader num="04" title="Comment & tag 2 frens" subtitle="Reply and mention 2 people" done={commentDone} />
-            {!commentDone ? (
+            {!commentDone && (
               <button
                 onClick={() => openAndMark(AURELIA_POST, () => setCommentDone(true))}
                 style={{
@@ -353,15 +353,14 @@ function WhitelistModal({ onClose, prefillHandle = "" }: { onClose: () => void; 
               >
                 Go to Post on X →
               </button>
-            ) : (
-              <Field
-                label="Paste your comment link"
-                value={commentLink}
-                onChange={v => { setCommentLink(v); setErrors(e => ({ ...e, commentLink: "" })); }}
-                placeholder="https://x.com/..."
-                error={errors.commentLink}
-              />
             )}
+            <Field
+              label="Paste your comment link"
+              value={commentLink}
+              onChange={v => { setCommentLink(v); setErrors(e => ({ ...e, commentLink: "" })); }}
+              placeholder="https://x.com/..."
+              error={errors.commentLink}
+            />
           </TaskCard>
         )}
 
@@ -565,11 +564,11 @@ function GatedLanding({ onSignIn, onApplyWhitelist }: { onSignIn: () => void; on
           {ASSETS.brand.name}
         </div>
 
-        {/* ── WL Button (top) ── */}
+        {/* ── WL Button (top) — FIXED: 3D shadow so it looks like a real button ── */}
         <button
           onClick={onApplyWhitelist}
           style={{
-            display: "flex", alignItems: "center", gap: 10,
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
             background: alreadyApplied ? "var(--gold-light)" : "var(--gold)",
             color: alreadyApplied ? "var(--gold)" : "var(--bg)",
             border: `1.5px solid var(--gold)`,
@@ -582,17 +581,33 @@ function GatedLanding({ onSignIn, onApplyWhitelist }: { onSignIn: () => void; on
             transition: "transform 0.15s, box-shadow 0.15s",
             width: "100%",
             maxWidth: 280,
-            justifyContent: "center",
+            boxShadow: alreadyApplied
+              ? "none"
+              : "0 3px 0 rgba(0,0,0,0.2), 0 6px 16px rgba(0,0,0,0.25)",
           }}
           onMouseEnter={(e) => {
             if (!alreadyApplied) {
-              e.currentTarget.style.transform = "translateY(-1px)";
-              e.currentTarget.style.boxShadow = "0 4px 24px rgba(0,0,0,0.18)";
+              e.currentTarget.style.transform = "translateY(-2px)";
+              e.currentTarget.style.boxShadow = "0 5px 0 rgba(0,0,0,0.2), 0 10px 28px rgba(0,0,0,0.3)";
             }
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = "none";
-            e.currentTarget.style.boxShadow = "none";
+            e.currentTarget.style.boxShadow = alreadyApplied
+              ? "none"
+              : "0 3px 0 rgba(0,0,0,0.2), 0 6px 16px rgba(0,0,0,0.25)";
+          }}
+          onMouseDown={(e) => {
+            if (!alreadyApplied) {
+              e.currentTarget.style.transform = "translateY(1px)";
+              e.currentTarget.style.boxShadow = "0 1px 0 rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.2)";
+            }
+          }}
+          onMouseUp={(e) => {
+            if (!alreadyApplied) {
+              e.currentTarget.style.transform = "translateY(-2px)";
+              e.currentTarget.style.boxShadow = "0 5px 0 rgba(0,0,0,0.2), 0 10px 28px rgba(0,0,0,0.3)";
+            }
           }}
         >
           {alreadyApplied ? (
@@ -612,25 +627,32 @@ function GatedLanding({ onSignIn, onApplyWhitelist }: { onSignIn: () => void; on
         <button
           onClick={onSignIn}
           style={{
-            display: "flex", alignItems: "center", gap: 10,
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
             background: "var(--text-main)", color: "var(--bg)",
             border: "none", borderRadius: 100,
             padding: "14px 32px", fontSize: 14,
             cursor: "pointer", fontFamily: "system-ui",
             letterSpacing: 0.4, fontWeight: 500,
-            boxShadow: "0 2px 20px rgba(0,0,0,0.12)",
+            boxShadow: "0 3px 0 rgba(0,0,0,0.2), 0 6px 16px rgba(0,0,0,0.25)",
             transition: "transform 0.15s, box-shadow 0.15s",
             width: "100%",
             maxWidth: 280,
-            justifyContent: "center",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-1px)";
-            e.currentTarget.style.boxShadow = "0 4px 24px rgba(0,0,0,0.18)";
+            e.currentTarget.style.transform = "translateY(-2px)";
+            e.currentTarget.style.boxShadow = "0 5px 0 rgba(0,0,0,0.2), 0 10px 28px rgba(0,0,0,0.3)";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = "none";
-            e.currentTarget.style.boxShadow = "0 2px 20px rgba(0,0,0,0.12)";
+            e.currentTarget.style.boxShadow = "0 3px 0 rgba(0,0,0,0.2), 0 6px 16px rgba(0,0,0,0.25)";
+          }}
+          onMouseDown={(e) => {
+            e.currentTarget.style.transform = "translateY(1px)";
+            e.currentTarget.style.boxShadow = "0 1px 0 rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.2)";
+          }}
+          onMouseUp={(e) => {
+            e.currentTarget.style.transform = "translateY(-2px)";
+            e.currentTarget.style.boxShadow = "0 5px 0 rgba(0,0,0,0.2), 0 10px 28px rgba(0,0,0,0.3)";
           }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -731,7 +753,7 @@ export default function Home() {
           <div
             style={{
               position: "fixed", inset: 0, zIndex: 100,
-              background: "rgba(0,0,0,0.85)", backdropFilter: "blur(12px)",
+              background: "rgba(0,0,0,0.95)", backdropFilter: "blur(12px)",
               display: "flex", alignItems: "center", justifyContent: "center",
               padding: "20px", overflowY: "auto",
             }}
