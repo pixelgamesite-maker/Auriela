@@ -7,9 +7,11 @@ export const WL_LS_KEY = "aurelia_wl_applied";
 const AURELIA_X    = "https://x.com/Aureliastudios_";
 const AURELIA_POST = "https://x.com/i/status/2068350731124342966";
 
+const NUMERALS = ["I", "II", "III", "IV", "V"];
+
 // ── CSS vars + keyframes injected so the modal works outside MainLayout ────────
 const MODAL_STYLES = `
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
   :root {
     --bg:           #0a0a0a;
@@ -17,23 +19,52 @@ const MODAL_STYLES = `
     --surface:      #161616;
     --border:       rgba(255,255,255,0.08);
     --gold:         #c9a96e;
+    --bronze:       #8b6f47;
     --gold-light:   rgba(201,169,110,0.10);
     --gold-border:  rgba(201,169,110,0.30);
-    --gold-glow:    rgba(201,169,110,0.06);
+    --gold-glow:    rgba(201,169,110,0.16);
     --text-main:    #f0ece4;
     --text-muted:   rgba(240,236,228,0.45);
   }
 
   @keyframes fadeUp  { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
   @keyframes pulse   { 0%,100%{opacity:1} 50%{opacity:.35} }
+  @keyframes draw    { from { stroke-dashoffset: 20; } to { stroke-dashoffset: 0; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .aurelia-wl-modal * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
 `;
 
-// ── Sparkle icon ───────────────────────────────────────────────────────────────
-function Sparkle({ size = 14, color = "var(--gold)" }: { size?: number; color?: string }) {
+// ── Seal marker — the signature element of the stepper ─────────────────────────
+// A wax-seal style marker: a hollow numeral disc while pending, a struck
+// bronze/gold seal with an engraved check once the step is complete.
+function SealMarker({ filled, numeral, size = 30 }: { filled: boolean; numeral: string; size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill={color} style={{ flexShrink: 0, display: "inline-block" }}>
-      <path d="M12 2 L13.2 10.8 L22 12 L13.2 13.2 L12 22 L10.8 13.2 L2 12 L10.8 10.8 Z" />
-    </svg>
+    <div
+      style={{
+        width: size, height: size, borderRadius: "50%", flexShrink: 0,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        background: filled ? "linear-gradient(135deg, var(--gold), var(--bronze))" : "var(--bg)",
+        border: `1px solid ${filled ? "var(--gold)" : "var(--border)"}`,
+        boxShadow: filled ? "0 0 0 3px var(--gold-glow)" : "none",
+        transition: "background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease",
+      }}
+    >
+      {filled ? (
+        <svg width={13} height={10} viewBox="0 0 16 12" fill="none">
+          <path
+            d="M1 6.5L6 11L15 1"
+            stroke="var(--bg)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+            style={{ strokeDasharray: 20, animation: "draw 0.4s ease" }}
+          />
+        </svg>
+      ) : (
+        <span style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontSize: 12, color: "var(--text-muted)" }}>
+          {numeral}
+        </span>
+      )}
+    </div>
   );
 }
 
@@ -48,8 +79,8 @@ function Field({
   const shared: React.CSSProperties = {
     width: "100%", background: "var(--bg)",
     border: `1px solid ${error ? "#c44" : "var(--border)"}`,
-    borderRadius: 10, color: "var(--text-main)", fontSize: 13,
-    padding: "12px 14px", fontFamily: "system-ui, sans-serif",
+    borderRadius: 6, color: "var(--text-main)", fontSize: 13,
+    padding: "11px 13px", fontFamily: "system-ui, sans-serif",
     resize: "none", display: "block", outline: "none",
     transition: "border-color 0.2s",
     boxSizing: "border-box",
@@ -58,9 +89,9 @@ function Field({
     <div style={{ marginBottom: 4 }}>
       {label && (
         <label style={{
-          display: "block", fontSize: 10, fontWeight: 600,
-          color: "var(--text-muted)", marginBottom: 8,
-          letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "system-ui",
+          display: "block", fontSize: 11, fontStyle: "italic",
+          color: "var(--text-muted)", marginBottom: 7,
+          fontFamily: "'Playfair Display', serif",
         }}>{label}</label>
       )}
       {as === "textarea"
@@ -72,71 +103,63 @@ function Field({
   );
 }
 
-// ── TaskCard ───────────────────────────────────────────────────────────────────
-function TaskCard({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
+// ── Step — seal marker + connecting thread + content, replaces the old   ──────
+// numbered-square-card-with-DONE-pill pattern with a continuous ledger rail.
+function Step({
+  numeral, title, subtitle, done, last = false, children,
+}: {
+  numeral: string; title: string; subtitle?: string; done: boolean; last?: boolean; children?: React.ReactNode;
+}) {
   return (
-    <div style={{
-      animation: `fadeUp 0.5s ease both`, animationDelay: `${delay}ms`,
-      background: "var(--panel)", border: `1px solid var(--border)`,
-      borderRadius: 14, padding: "20px 22px",
-    }}>
-      {children}
-    </div>
-  );
-}
-
-// ── TaskHeader ─────────────────────────────────────────────────────────────────
-function TaskHeader({ num, title, subtitle, done }: { num: string; title: string; subtitle: string; done: boolean }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: done ? 0 : 14 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <div style={{
-          width: 32, height: 32, borderRadius: 8,
-          background: done ? "var(--gold-light)" : "var(--bg)",
-          border: `1px solid ${done ? "var(--gold-border)" : "var(--border)"}`,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: 11, fontWeight: 700,
-          color: done ? "var(--gold)" : "var(--text-muted)",
-          fontFamily: "system-ui", flexShrink: 0,
-        }}>
-          {done ? <Sparkle size={12} /> : num}
-        </div>
-        <div>
-          <div style={{ fontSize: 14, fontWeight: 700, color: done ? "var(--gold)" : "var(--text-main)", fontFamily: "system-ui" }}>{title}</div>
-          <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2, fontFamily: "system-ui" }}>{subtitle}</div>
-        </div>
+    <div style={{ display: "flex", gap: 14, animation: "fadeUp 0.45s ease both" }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 30, flexShrink: 0 }}>
+        <SealMarker filled={done} numeral={numeral} />
+        {!last && (
+          <div style={{
+            width: 1, flex: 1, minHeight: 26, marginTop: 6,
+            background: done ? "var(--gold-border)" : "var(--border)",
+            transition: "background 0.4s ease",
+          }} />
+        )}
       </div>
-      {done && (
-        <span style={{
-          display: "inline-flex", alignItems: "center", gap: 4,
-          background: "var(--gold-light)", border: `1px solid var(--gold-border)`,
-          borderRadius: 6, padding: "3px 10px", fontSize: 9,
-          fontWeight: 700, color: "var(--gold)", letterSpacing: "0.08em",
-          textTransform: "uppercase", fontFamily: "system-ui",
+      <div style={{ flex: 1, minWidth: 0, paddingBottom: last ? 2 : 22 }}>
+        <h4 style={{
+          margin: 0, fontFamily: "'Playfair Display', serif", fontStyle: "italic",
+          fontSize: 16, fontWeight: 700, color: done ? "var(--gold)" : "var(--text-main)",
+          transition: "color 0.3s ease",
         }}>
-          <Sparkle size={8} /> Done
-        </span>
-      )}
+          {title}
+        </h4>
+        {subtitle && (
+          <p style={{ margin: "2px 0 12px", fontSize: 11.5, color: "var(--text-muted)", fontFamily: "system-ui" }}>
+            {subtitle}
+          </p>
+        )}
+        {children}
+      </div>
     </div>
   );
 }
 
-// ── StepButton ─────────────────────────────────────────────────────────────────
-function StepButton({ label, onClick }: { label: string; onClick: () => void }) {
+// ── StepAction — an understated underline link, not another filled pill ───────
+function StepAction({ label, onClick }: { label: string; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
       style={{
-        width: "100%", padding: "11px 0",
-        background: "var(--gold-light)", border: `1px solid var(--gold-border)`,
-        borderRadius: 10, color: "var(--gold)",
-        fontFamily: "system-ui", fontWeight: 600, fontSize: 12, cursor: "pointer",
-        letterSpacing: "0.04em", transition: "all 0.2s",
+        display: "inline-flex", alignItems: "center", gap: 8,
+        background: "transparent", border: "none", borderBottom: "1px solid var(--gold-border)",
+        color: "var(--gold)", fontFamily: "system-ui", fontWeight: 600, fontSize: 12,
+        letterSpacing: "0.04em", cursor: "pointer", padding: "6px 0", marginBottom: 12,
+        transition: "border-color 0.2s",
       }}
-      onMouseEnter={e => { e.currentTarget.style.background = "var(--gold)"; e.currentTarget.style.color = "var(--bg)"; }}
-      onMouseLeave={e => { e.currentTarget.style.background = "var(--gold-light)"; e.currentTarget.style.color = "var(--gold)"; }}
+      onMouseEnter={e => (e.currentTarget.style.borderBottomColor = "var(--gold)")}
+      onMouseLeave={e => (e.currentTarget.style.borderBottomColor = "var(--gold-border)")}
     >
       {label}
+      <svg width="11" height="11" viewBox="0 0 16 16" fill="none">
+        <path d="M3 8h10M9 4l4 4-4 4" stroke="var(--gold)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
     </button>
   );
 }
@@ -225,20 +248,15 @@ export function WhitelistModal({ onClose, prefillHandle = "" }: { onClose: () =>
     return (
       <>
         <style>{MODAL_STYLES}</style>
-        <div style={{
+        <div className="aurelia-wl-modal" style={{
           background: "var(--panel)", borderRadius: 18, border: `1px solid var(--border)`,
           padding: "40px 32px", textAlign: "center", maxWidth: 420, width: "100%",
           animation: "fadeUp 0.4s ease",
         }}>
-          <div style={{
-            width: 56, height: 56, borderRadius: 16,
-            background: "var(--gold-light)", border: `1px solid var(--gold-border)`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            margin: "0 auto 20px",
-          }}>
-            <Sparkle size={24} />
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+            <SealMarker filled numeral="" size={56} />
           </div>
-          <h3 style={{ fontSize: 22, fontWeight: 700, color: "var(--text-main)", marginBottom: 8, fontFamily: "'Playfair Display', serif" }}>
+          <h3 style={{ fontSize: 22, fontWeight: 700, fontStyle: "italic", color: "var(--text-main)", marginBottom: 8, fontFamily: "'Playfair Display', serif" }}>
             Application Received
           </h3>
           <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.7, fontFamily: "system-ui" }}>
@@ -264,7 +282,7 @@ export function WhitelistModal({ onClose, prefillHandle = "" }: { onClose: () =>
   return (
     <>
       <style>{MODAL_STYLES}</style>
-      <div style={{
+      <div className="aurelia-wl-modal" style={{
         background: "var(--panel)", borderRadius: 18, border: `1px solid var(--border)`,
         padding: "28px 24px", maxWidth: 480, width: "100%",
         maxHeight: "85vh", overflowY: "auto", position: "relative",
@@ -288,26 +306,25 @@ export function WhitelistModal({ onClose, prefillHandle = "" }: { onClose: () =>
         </button>
 
         {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: 24 }}>
+        <div style={{ textAlign: "center", marginBottom: 26 }}>
           <p style={{
             fontSize: 10, fontWeight: 700, color: "var(--gold)",
             letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 8, fontFamily: "system-ui",
           }}>
             Whitelist Application
           </p>
-          <h2 style={{ fontSize: 22, fontWeight: 700, color: "var(--text-main)", marginBottom: 6, fontFamily: "'Playfair Display', serif" }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, fontStyle: "italic", color: "var(--text-main)", marginBottom: 6, fontFamily: "'Playfair Display', serif" }}>
             Secure Your Spot
           </h2>
           <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6, fontFamily: "system-ui" }}>
-            Complete each step. The next unlocks when you finish the last.
+            A short dossier — five entries, in order.
           </p>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {/* Step 1 — X username */}
-          <TaskCard delay={0}>
-            <TaskHeader num="01" title="Your X username" subtitle="So we know who you are" done={usernameLocked} />
-            {!usernameLocked && (
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          {/* Step I — X username */}
+          <Step numeral={NUMERALS[0]} title="Your X username" subtitle="So we know who you are" done={usernameLocked} last={!step2}>
+            {!usernameLocked ? (
               <Field
                 label=""
                 value={xUsername}
@@ -317,30 +334,30 @@ export function WhitelistModal({ onClose, prefillHandle = "" }: { onClose: () =>
                 onBlur={() => { if (xUsername.trim()) setUsernameLocked(true); }}
                 onKeyDown={e => { if (e.key === "Enter" && xUsername.trim()) setUsernameLocked(true); }}
               />
+            ) : (
+              <p style={{ margin: 0, fontSize: 12, color: "var(--text-muted)", fontFamily: "system-ui" }}>
+                Filed as <span style={{ color: "var(--gold)" }}>@{xUsername.trim().replace(/^@/, "")}</span>
+              </p>
             )}
-          </TaskCard>
+          </Step>
 
-          {/* Step 2 — Follow */}
+          {/* Step II — Follow */}
           {step2 && (
-            <TaskCard delay={60}>
-              <TaskHeader num="02" title="Follow @Aureliastudios_" subtitle="Join the community" done={followDone} />
+            <Step numeral={NUMERALS[1]} title="Follow @Aureliastudios_" subtitle="Join the community" done={followDone} last={!step3}>
               {!followDone && (
                 <>
-                  <StepButton label="Follow on X →" onClick={() => openAndMark(AURELIA_X, () => setFollowDone(true))} />
-                  {errors.follow && <p style={{ color: "#c44", fontSize: 12, marginTop: 8, fontFamily: "system-ui" }}>{errors.follow}</p>}
+                  <div><StepAction label="Follow on X" onClick={() => openAndMark(AURELIA_X, () => setFollowDone(true))} /></div>
+                  {errors.follow && <p style={{ color: "#c44", fontSize: 12, marginTop: -4, fontFamily: "system-ui" }}>{errors.follow}</p>}
                 </>
               )}
-            </TaskCard>
+            </Step>
           )}
 
-          {/* Step 3 — Like & Quote */}
+          {/* Step III — Like & Quote */}
           {step3 && (
-            <TaskCard delay={60}>
-              <TaskHeader num="03" title="Like & Quote Tweet" subtitle="Engage with the pinned post" done={likeQuoteDone} />
+            <Step numeral={NUMERALS[2]} title="Like & quote tweet" subtitle="Engage with the pinned post" done={likeQuoteDone} last={!step4}>
               {!likeQuoteDone && (
-                <div style={{ marginBottom: 12 }}>
-                  <StepButton label="View Post →" onClick={() => openAndMark(AURELIA_POST, () => setLikeQuoteDone(true))} />
-                </div>
+                <div><StepAction label="View post" onClick={() => openAndMark(AURELIA_POST, () => setLikeQuoteDone(true))} /></div>
               )}
               <Field
                 label="Paste your quote link"
@@ -349,17 +366,14 @@ export function WhitelistModal({ onClose, prefillHandle = "" }: { onClose: () =>
                 placeholder="https://x.com/..."
                 error={errors.quoteLink}
               />
-            </TaskCard>
+            </Step>
           )}
 
-          {/* Step 4 — Comment */}
+          {/* Step IV — Comment */}
           {step4 && (
-            <TaskCard delay={60}>
-              <TaskHeader num="04" title="Comment & tag 2 frens" subtitle="Reply and mention 2 people" done={commentDone} />
+            <Step numeral={NUMERALS[3]} title="Comment & tag 2 frens" subtitle="Reply and mention 2 people" done={commentDone} last={!step5}>
               {!commentDone && (
-                <div style={{ marginBottom: 12 }}>
-                  <StepButton label="Go to Post on X →" onClick={() => openAndMark(AURELIA_POST, () => setCommentDone(true))} />
-                </div>
+                <div><StepAction label="Go to post on X" onClick={() => openAndMark(AURELIA_POST, () => setCommentDone(true))} /></div>
               )}
               <Field
                 label="Paste your comment link"
@@ -368,13 +382,12 @@ export function WhitelistModal({ onClose, prefillHandle = "" }: { onClose: () =>
                 placeholder="https://x.com/..."
                 error={errors.commentLink}
               />
-            </TaskCard>
+            </Step>
           )}
 
-          {/* Step 5 — Wallet */}
+          {/* Step V — Wallet */}
           {step5 && (
-            <TaskCard delay={60}>
-              <TaskHeader num="05" title="EVM Wallet Address" subtitle="Where your spot will be reserved" done={false} />
+            <Step numeral={NUMERALS[4]} title="EVM wallet address" subtitle="Where your spot will be reserved" done={false} last>
               <Field
                 label=""
                 value={wallet}
@@ -382,36 +395,36 @@ export function WhitelistModal({ onClose, prefillHandle = "" }: { onClose: () =>
                 placeholder="0x..."
                 error={errors.wallet}
               />
-            </TaskCard>
-          )}
-
-          {/* Submit */}
-          {step5 && (
-            <div style={{ animation: "fadeUp 0.5s ease both", animationDelay: "80ms", marginTop: 4 }}>
-              {errors.submit && (
-                <p style={{ color: "#c44", fontSize: 13, marginBottom: 12, textAlign: "center", fontFamily: "system-ui" }}>{errors.submit}</p>
-              )}
-              <button
-                onClick={handleSubmit}
-                disabled={submitting}
-                style={{
-                  width: "100%", padding: "14px",
-                  background: "var(--gold)", borderRadius: 12,
-                  border: "none", color: "var(--bg)",
-                  fontFamily: "system-ui", fontWeight: 700, fontSize: 13,
-                  letterSpacing: "0.06em", textTransform: "uppercase",
-                  cursor: submitting ? "not-allowed" : "pointer",
-                  opacity: submitting ? 0.6 : 1, transition: "all 0.2s",
-                }}
-              >
-                {submitting ? "Securing your spot…" : "Secure My Spot"}
-              </button>
-              <p style={{ textAlign: "center", fontSize: 11, color: "var(--text-muted)", marginTop: 10, fontFamily: "system-ui" }}>
-                Double-check your wallet before submitting.
-              </p>
-            </div>
+            </Step>
           )}
         </div>
+
+        {/* Submit */}
+        {step5 && (
+          <div style={{ animation: "fadeUp 0.5s ease both", animationDelay: "80ms", marginTop: 8 }}>
+            {errors.submit && (
+              <p style={{ color: "#c44", fontSize: 13, marginBottom: 12, textAlign: "center", fontFamily: "system-ui" }}>{errors.submit}</p>
+            )}
+            <button
+              onClick={handleSubmit}
+              disabled={submitting}
+              style={{
+                width: "100%", padding: "14px",
+                background: "var(--gold)", borderRadius: 12,
+                border: "none", color: "var(--bg)",
+                fontFamily: "system-ui", fontWeight: 700, fontSize: 13,
+                letterSpacing: "0.06em", textTransform: "uppercase",
+                cursor: submitting ? "not-allowed" : "pointer",
+                opacity: submitting ? 0.6 : 1, transition: "all 0.2s",
+              }}
+            >
+              {submitting ? "Securing your spot…" : "Secure My Spot"}
+            </button>
+            <p style={{ textAlign: "center", fontSize: 11, color: "var(--text-muted)", marginTop: 10, fontFamily: "system-ui" }}>
+              Double-check your wallet before submitting.
+            </p>
+          </div>
+        )}
       </div>
     </>
   );
