@@ -217,6 +217,15 @@ export function subscribeToLiveFeed(callback: (claim: StarClaim) => void) {
 
 // ── Whitelist helpers ─────────────────────────────────────────────────────────
 
+// NOTE: this insert intentionally does NOT chain .select().single().
+// The applicant is unauthenticated (anon role) at this point, and even
+// though the INSERT policy permits the write, Supabase's insert+select
+// also re-checks the table's SELECT policy against the new row before
+// returning it. Since anon has no SELECT policy here, that read-back
+// fails RLS and rolls back the whole insert — surfacing as the same
+// generic "new row violates row-level security policy" error, even
+// though the actual INSERT was fine. Dropping .select() avoids the
+// read-back entirely, so we just confirm success/failure.
 export async function applyWhitelist(data: {
   x_username: string;
   wallet: string;
@@ -226,8 +235,8 @@ export async function applyWhitelist(data: {
   like_quote_done?: boolean;
   comment_done?: boolean;
   stars_at_apply?: number;
-}): Promise<{ ok: boolean; data?: WhitelistEntry }> {
-  const { data: result, error } = await supabase
+}): Promise<{ ok: boolean }> {
+  const { error } = await supabase
     .from("aurelia_whitelist")
     .insert({
       x_username: data.x_username.replace(/^@/, ""),
@@ -238,15 +247,13 @@ export async function applyWhitelist(data: {
       like_quote_done: data.like_quote_done ?? false,
       comment_done: data.comment_done ?? false,
       stars_at_apply: data.stars_at_apply ?? 0,
-    })
-    .select()
-    .single();
+    });
 
   if (error) {
     console.error("applyWhitelist failed:", error.message);
     throw error;
   }
-  return { ok: true, data: result };
+  return { ok: true };
 }
 
 export async function getWhitelistStatus(xHandle: string): Promise<Pick<WhitelistEntry, "status" | "created_at" | "stars_at_apply"> | null> {
