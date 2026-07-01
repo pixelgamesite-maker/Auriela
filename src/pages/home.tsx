@@ -7,10 +7,8 @@ import {
   completeTask,
   getRecentClaims,
   subscribeToLiveFeed,
-  getReferralCount,
   getWhitelistStatus,
   CLAIM_INTERVAL_MS,
-  REFERRAL_STARS,
   type StarClaim,
 } from "@/lib/supabase";
 import { ASSETS } from "@/lib/assets";
@@ -26,8 +24,6 @@ const INTERACTIVE_TASKS = [
   { id: "read_lore",     label: "Read the Lore",  stars: 15, href: "/lore",   internal: true,                                                                 icon: "book"    },
   { id: "claim_more",    label: "Claim More Stars", stars: 10, href: "/social", internal: true,                                                               icon: "stars"   },
 ];
-
-const REFERRAL_STORAGE_KEY = "aurelia_ref";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 function fmt(ms: number) {
@@ -115,17 +111,9 @@ export default function Home() {
   const [claimMsg,    setClaimMsg]    = useState("");
   const [feed,        setFeed]        = useState<StarClaim[]>([]);
   const [taskLoading, setTaskLoading] = useState<string | null>(null);
-  const [referralCount, setReferralCount] = useState(0);
-  const [copied,        setCopied]        = useState(false);
+
 
   const [wlStatus, setWlStatus] = useState<string | null>(null);
-
-  // Capture a ?ref=<handle> code from the URL (if present) so it survives
-  // the X OAuth redirect. Runs regardless of auth state.
-  useEffect(() => {
-    const ref = new URLSearchParams(window.location.search).get("ref");
-    if (ref) localStorage.setItem(REFERRAL_STORAGE_KEY, ref);
-  }, []);
 
   useEffect(() => {
     const tick = () => {
@@ -147,11 +135,6 @@ export default function Home() {
     });
     return () => { channel.unsubscribe(); };
   }, []);
-
-  useEffect(() => {
-    if (!user) return;
-    getReferralCount(user.id).then(setReferralCount);
-  }, [user?.id]);
 
   useEffect(() => {
     if (!user?.x_handle) return;
@@ -201,18 +184,6 @@ export default function Home() {
       await refreshUser();
     }
     setTaskLoading(null);
-  };
-
-  const referralLink = `${window.location.origin}/?ref=${user.x_handle.replace(/^@/, "")}`;
-
-  const handleCopyReferral = async () => {
-    try {
-      await navigator.clipboard.writeText(referralLink);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Clipboard API unavailable — fail silently, link is still visible to copy manually.
-    }
   };
 
   return (
@@ -509,49 +480,6 @@ export default function Home() {
             </div>
           </div>{/* end task list card */}
 
-          {/* ── REFERRAL CARD ─────────────────────────────────────────────── */}
-          <div style={{
-            background: "var(--panel)",
-            border: `1px solid var(--border)`,
-            borderRadius: 16,
-            padding: "16px 20px 18px",
-            marginTop: 12,
-            boxShadow: "0 1px 12px rgba(0,0,0,0.04)",
-          }}>
-            <SectionHead label="REFER A FRIEND" />
-            <p style={{ fontSize: 12.5, color: "var(--text-muted)", fontFamily: "system-ui", lineHeight: 1.6, margin: "0 0 12px" }}>
-              Earn <strong style={{ color: "var(--gold)" }}>+{REFERRAL_STARS}</strong> stars for every friend who signs up with your link.
-            </p>
-
-            <div style={{
-              display: "flex", alignItems: "center", gap: 8,
-              background: "var(--bg)", border: `1px solid var(--border)`,
-              borderRadius: 10, padding: "10px 12px",
-            }}>
-              <span style={{
-                flex: 1, fontSize: 12.5, color: "var(--text-main)", fontFamily: "system-ui",
-                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-              }}>
-                {referralLink}
-              </span>
-              <button
-                className="outline-btn"
-                onClick={handleCopyReferral}
-                style={{
-                  flexShrink: 0, background: "var(--text-main)", color: "var(--bg)",
-                  border: "none", borderRadius: 100, padding: "6px 14px",
-                  fontSize: 11.5, fontWeight: 600, cursor: "pointer", fontFamily: "system-ui",
-                }}
-              >
-                {copied ? "Copied!" : "Copy"}
-              </button>
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 12, fontSize: 12, color: "var(--text-muted)", fontFamily: "system-ui" }}>
-              <Sparkle size={9} color="var(--gold)" />
-              {referralCount} friend{referralCount === 1 ? "" : "s"} joined via your link
-            </div>
-          </div>{/* end referral card */}
         </div>{/* end cards padding wrapper */}
       </section>
 
