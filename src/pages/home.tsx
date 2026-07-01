@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { MainLayout } from "@/layouts/main-layout";
 import { useAuth } from "@/hooks/useAuth";
